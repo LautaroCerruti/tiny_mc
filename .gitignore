@@ -1,0 +1,6 @@
+# Ignorar archivos objeto (archivos .o generados al compilar)
+*.o
+
+# Ignorar ejecutables generados
+head
+headless
