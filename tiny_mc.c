@@ -26,6 +26,29 @@ char t3[] = "CPU version, adapted for PEAGPGPU by Gustavo Castellano"
 static float heat[SHELLS];
 static float heat2[SHELLS];
 
+int write_stat_file(double elapsed) {
+    const char *filename = "resultados.csv";
+    FILE *csvFile;
+
+    csvFile = fopen(filename, "r");
+    if (csvFile == NULL) {
+        csvFile = fopen(filename, "w");
+
+        if (csvFile == NULL) {
+            fprintf(stderr, "Error opening file\n");
+            return 1;
+        }
+        fprintf(csvFile, "photons,time,pns\n");
+    } else {
+        fclose(csvFile);
+        csvFile = fopen(filename, "a");
+    }
+
+    fprintf(csvFile, "%i, %lf, %lf\n", PHOTONS, elapsed, PHOTONS / (elapsed * 1e9));
+    fclose(csvFile);
+
+    return 0;
+}
 
 /***
  * Main matter
@@ -53,7 +76,8 @@ int main(void)
     double elapsed = end - start;
 
     printf("# %lf seconds\n", elapsed);
-    printf("# %lf K photons per second\n", 1e-3 * PHOTONS / elapsed);
+    printf("# %lf photons per nanosecond\n", PHOTONS  / (elapsed*1e9));
+    write_stat_file(elapsed);
 
     printf("# Radius\tHeat\n");
     printf("# [microns]\t[W/cm^3]\tError\n");
