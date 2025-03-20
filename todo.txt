@@ -1,0 +1,12 @@
+1)  hacer en make o en meson una opcion que tome la cantidad de fotones y 
+    la catidad de ejecuciones y corra el programa de forma que los resultados queden en el csv
+2) hacer un script de python que genere una gráfica a partir de los resultados
+3) decidir que tamaños de tests y cuantas veces vamos a correr cada uno
+
+Usar 2 pcs, usar gcc y clang, las opciones [O0, O1, O2, O3, Ofast] y alguna otra si hay, 
+native y no native, mejora random y log si es posible.
+
+compiler, flags, native
+gcc,-O0
+
+potons, runs
