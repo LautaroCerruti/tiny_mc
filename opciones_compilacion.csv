@@ -1,6 +1,2 @@
 compiler,flags,native,lto
-gcc,-O0 -funroll-loops,true,true
-gcc,-O1 -funroll-loops,true,true
-gcc,-O2 -funroll-loops,true,true
-gcc,-O3 -funroll-loops,true,true
-gcc,-Ofast -funroll-loops,true,true
+gcc,-O0,false,false

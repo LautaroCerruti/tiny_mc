@@ -1,12 +1,18 @@
-1)  hacer en make o en meson una opcion que tome la cantidad de fotones y 
-    la catidad de ejecuciones y corra el programa de forma que los resultados queden en el csv
-2) hacer un script de python que genere una gráfica a partir de los resultados
-3) decidir que tamaños de tests y cuantas veces vamos a correr cada uno
+1) hacer un script de python que genere una gráfica a partir de los resultados
+2) decidir que tamaños de tests y cuantas veces vamos a correr cada uno
 
 Usar 2 pcs, usar gcc y clang, las opciones [O0, O1, O2, O3, Ofast] y alguna otra si hay, 
 native y no native, mejora random y log si es posible.
 
-compiler, flags, native
-gcc,-O0
+lo mas logico me parece que para las optimizaciones probar ambos compiladores hacer:
+opcion de optimizacion, optimizacion + native y optimizacion + native + lto
+esto haria que sean 15 posibles combinaciones para cada compi, 30 en total
+esto lo correria unas pocas veces para un valor muy grande en cada PC.
+Esto nos dejaria con 2/4 graficas, divididas por pc o por pc+compilador.
 
-potons, runs
+Despues haria otra gráfica mostrando como escala el mejor programa obtenido con las 
+optimizaciones segun el tamaño del problema, esto en cada PC son 2 gráficas mas.
+
+La parte de optimizacion de código se puede hacer al pricipio o al final, si lo hacemos al 
+final podemos sumar a la grafica de escalado por tamaño como seria con las optimizaciones de código, 
+mostrando que tanto mejor es.

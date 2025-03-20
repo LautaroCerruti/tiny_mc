@@ -41,12 +41,12 @@
              fprintf(stderr, "Error opening file %s\n", filename);
              return 1;
          }
-         fprintf(csvFile, "photons,time,pns,ins\n");
+         fprintf(csvFile, "photons,time,pus,ins,ius\n");
      } else {
          fclose(csvFile);
          csvFile = fopen(filename, "a");
      }
-     fprintf(csvFile, "%i, %lf, %lf, %lld\n", PHOTONS, elapsed, PHOTONS / (elapsed * 1e9), count);
+     fprintf(csvFile, "%i, %lf, %lf, %lld, %lf\n", PHOTONS, elapsed, PHOTONS / (elapsed * 1e6), count, count / (elapsed * 1e6));
      fclose(csvFile);
      return 0;
  }

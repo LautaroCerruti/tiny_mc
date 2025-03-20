@@ -65,7 +65,8 @@ def ejecutar_headless(runs, compiler, additional_flags, usar_native, usar_lto):
     """
     for i in range(runs):
         print(f"Ejecución {i+1} de {runs}...")
-        resultado = subprocess.run("./headless -q -o" + f"./results/{compiler}_{additional_flags.replace(" ", "")}_n-{usar_native}_lto-{usar_lto}.csv", shell=True)
+        #resultado = subprocess.run("./headless -q -o" + f"./results/{compiler}_{additional_flags.replace(" ", "")}_n-{usar_native}_lto-{usar_lto}.csv", shell=True)
+        resultado = subprocess.run("./headless -q -o" + f"./results/photon_size.csv", shell=True)
         if resultado.returncode != 0:
             print("Error al ejecutar headless.")
             break
