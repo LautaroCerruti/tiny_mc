@@ -34,7 +34,7 @@ def compile_executable(compiler, additional_flags, usar_native, usar_lto, macro)
     print(f"\nCompilando con:\n  Compilador: {compiler}\n  Flags: {flags}")
 
     # Lista de archivos fuente a compilar
-    fuentes = ['tiny_mc.c', 'wtime.c', 'photon.c']
+    fuentes = ['tiny_mc.c', 'wtime.c', 'photon.c', 'xoshiro.c']
     objetos = []
     for fuente in fuentes:
         objeto = os.path.splitext(fuente)[0] + '.o'

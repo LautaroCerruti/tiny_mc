@@ -6,6 +6,7 @@
 
 #include "params.h"
 #include "photon.h"
+#include "xoshiro.h"
 
 #define PHOTON_CAP 1 << 16
 #define MAX_PHOTONS_PER_FRAME 20
@@ -88,6 +89,7 @@ void update(void)
 
 int main(void)
 {
+    seed((uint64_t) SEED);
     glfwInit();
 
     glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
