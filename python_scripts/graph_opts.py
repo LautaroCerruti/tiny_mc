@@ -2,7 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # Leer el CSV
-df = pd.read_csv('./results/merged.csv')
+df = pd.read_csv('./results/optimize_wflags_notebook.csv')
 
 # Opcional: asegurar que las columnas numéricas sean de tipo float
 df['pus'] = pd.to_numeric(df['pus'], errors='coerce')
