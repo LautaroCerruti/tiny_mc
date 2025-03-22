@@ -1,8 +1,8 @@
 # Compilers
-CC = gcc
+CC = clang
 
 # Flags
-CFLAGS = -std=c11 -Wall -Wextra
+CFLAGS = -std=c11 -Wall -Wextra -Ofast -march=native -flto
 TINY_LDFLAGS = -lm 
 CG_LDFLAGS = -lm -lglfw -lGL -lGLEW
 
