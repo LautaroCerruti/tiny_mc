@@ -82,6 +82,7 @@
  int main(int argc, char *argv[])
  {
     seed((uint64_t) SEED);
+    srand((uint64_t) SEED);
      // Variables para la línea de comandos
      const char *output_filename = "resultados.csv";
      int verbose = 1;  // 1: imprimir en pantalla, 0: modo quiet
@@ -128,7 +129,7 @@
  
      if (verbose) {
          printf("# %lf seconds\n", elapsed);
-         printf("# %lf photons per nanosecond\n", PHOTONS / (elapsed * 1e9));
+         printf("# %lf photons per microseconds\n", PHOTONS / (elapsed * 1e6));
      }
  
      if (read(fd, &count, sizeof(long long)) == -1) {
