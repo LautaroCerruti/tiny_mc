@@ -82,7 +82,6 @@
  int main(int argc, char *argv[])
  {
     seed((uint64_t) SEED);
-    srand((uint64_t) SEED);
      // Variables para la línea de comandos
      const char *output_filename = "resultados.csv";
      int verbose = 1;  // 1: imprimir en pantalla, 0: modo quiet
