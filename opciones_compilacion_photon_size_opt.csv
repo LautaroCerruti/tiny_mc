@@ -1,2 +1,2 @@
 compiler,flags,lto,native
-clang,-Ofast,true,true
+icx,-O3,true,true
