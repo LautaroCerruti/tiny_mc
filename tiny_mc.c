@@ -11,7 +11,7 @@
  #include "params.h"
  #include "photon.h"
  #include "wtime.h"
- #include "xoshiro.h"
+ //#include "xoshiro.h"
  
  #include <assert.h>
  #include <math.h>
@@ -81,7 +81,8 @@
   ***/
  int main(int argc, char *argv[])
  {
-    seed((uint64_t) SEED);
+    srand(SEED);
+    //seed((uint64_t) SEED);
      // Variables para la línea de comandos
      const char *output_filename = "resultados.csv";
      int verbose = 1;  // 1: imprimir en pantalla, 0: modo quiet

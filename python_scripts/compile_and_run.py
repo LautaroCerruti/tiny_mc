@@ -77,7 +77,7 @@ def ejecutar_headless(runs, nombre_ejecucion):
     for i in range(runs):
         print(f"Ejecución {i+1} de {runs}...")
         guardar_ejecucion(nombre_ejecucion)
-        cmd = "./headless -q -o ./results/photon_size_atom_xoshiro_opt.csv"
+        cmd = "./headless -q -o ./results/photon_size_atom_opt.csv"
         resultado = subprocess.run(cmd, shell=True)
         if resultado.returncode != 0:
             print("Error al ejecutar headless.")
