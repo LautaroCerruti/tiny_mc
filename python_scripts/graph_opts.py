@@ -6,7 +6,6 @@ df = pd.read_csv('./results/optimize_wflags_notebook.csv')
 
 # Opcional: asegurar que las columnas numéricas sean de tipo float
 df['pus'] = pd.to_numeric(df['pus'], errors='coerce')
-df['ius'] = pd.to_numeric(df['ius'], errors='coerce')
 df['photons'] = pd.to_numeric(df['photons'], errors='coerce')
 
 # Filtrar por compilador: gcc y clang
@@ -14,13 +13,12 @@ df_gcc = df[df['compilador_flag'].str.contains('gcc', case=False)]
 df_clang = df[df['compilador_flag'].str.contains('clang', case=False)]
 
 def procesar_datos(data):
-    # Agrupar por compilador_flag y photons, calculando promedio y máximo de pus e ius
+    # Agrupar por compilador_flag y photons, calculando promedio y máximo de pus
     agrupado = data.groupby(['compilador_flag', 'photons']).agg({
-        'pus': ['mean', 'max'],
-        'ius': ['mean', 'max']
+        'pus': ['mean', 'max']
     }).reset_index()
     # Aplanar el MultiIndex de columnas
-    agrupado.columns = ['compilador_flag', 'photons', 'pus_mean', 'pus_max', 'ius_mean', 'ius_max']
+    agrupado.columns = ['compilador_flag', 'photons', 'pus_mean', 'pus_max']
     return agrupado
 
 grouped_gcc = procesar_datos(df_gcc)
@@ -28,17 +26,24 @@ grouped_clang = procesar_datos(df_clang)
 
 def plot_metric(agrupado, compiler_label, metric='pus'):
     """
-    Grafica para la métrica indicada (pus o ius) de los datos agrupados.
+    Grafica para la métrica indicada (en este caso solo 'pus') de los datos agrupados.
     Se generan dos líneas para cada valor de photons: promedio (línea punteada) y máximo (línea continua).
+    Para 'pus' se usa la etiqueta "P/µs".
+    El gráfico se guarda en un archivo PNG.
     """
+    # Definir la etiqueta personalizada para 'pus'
+    if metric == 'pus':
+        label_metric = "P/µs"
+    else:
+        label_metric = metric.upper()
+        
     # Extraer los valores únicos de photons (ordenados)
     unique_photons = sorted(agrupado['photons'].unique())
-    markers = ['o', 's', '^', 'D', 'v', '<', '>']  # para variar los marcadores si hay muchos grupos
+    markers = ['o', 's', '^', 'D', 'v', '<', '>']
     colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
     
     plt.figure(figsize=(10, 6))
     for i, photon in enumerate(unique_photons):
-        # Filtrar y ordenar según compilador_flag para el valor actual de photons
         sub_df = agrupado[agrupado['photons'] == photon].sort_values('compilador_flag')
         x = sub_df['compilador_flag']
         mean_col = f"{metric}_mean"
@@ -46,32 +51,34 @@ def plot_metric(agrupado, compiler_label, metric='pus'):
         
         # Promedio: línea punteada
         plt.plot(x, sub_df[mean_col], marker=markers[i % len(markers)], linestyle=':',
-                 color=colors[i % len(colors)], label=f'Photons {photon} promedio')
+                 color=colors[i % len(colors)], label=f'{photon} fotones promedio')
         # Máximo: línea continua
         plt.plot(x, sub_df[max_col], marker=markers[i % len(markers)], linestyle='-',
-                 color=colors[i % len(colors)], label=f'Photons {photon} maximo')
+                 color=colors[i % len(colors)], label=f'{photon} fotones máximo')
     
     plt.xlabel('compilador_flag')
-    plt.ylabel(metric.upper())
-    plt.title(f'{metric.upper()}: Promedio y Máximo para {compiler_label}')
+    plt.ylabel(label_metric)
+    plt.title(f'{label_metric}: Promedio y Máximo para {compiler_label}')
     plt.xticks(rotation=45)
     plt.legend()
     plt.grid(True)
+    plt.ylim(0.175, 0.7)  # Limitar el eje Y
     plt.tight_layout()
-    plt.show()
-    # Si se desea guardar el gráfico:
-    # plt.savefig(f'{compiler_label.lower()}_{metric}.png')
+    
+    # Guardar el gráfico en un archivo PNG y cerrar la figura
+    filename = f'{compiler_label.lower()}_{metric}.png'
+    plt.savefig(filename)
+    plt.close()
+    print(f'Imagen guardada en: {filename}')
 
-# Graficar para GCC (si hay datos)
+# Graficar y guardar para GCC (si hay datos)
 if not grouped_gcc.empty:
     plot_metric(grouped_gcc, 'GCC', metric='pus')
-    plot_metric(grouped_gcc, 'GCC', metric='ius')
 else:
     print("No se encontraron datos para GCC.")
 
-# Graficar para Clang (si hay datos)
+# Graficar y guardar para Clang (si hay datos)
 if not grouped_clang.empty:
     plot_metric(grouped_clang, 'Clang', metric='pus')
-    plot_metric(grouped_clang, 'Clang', metric='ius')
 else:
     print("No se encontraron datos para Clang.")

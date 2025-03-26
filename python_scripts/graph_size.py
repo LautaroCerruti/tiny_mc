@@ -5,7 +5,7 @@ from matplotlib.patches import Rectangle
 import math
 
 # Cargar el archivo CSV
-df = pd.read_csv("./results/photon_size.csv", skipinitialspace=True)
+df = pd.read_csv("./results/photon_size_notebook_xoshiro.csv", skipinitialspace=True)
 
 # Calcular los mínimos y máximos globales para la transformación
 pus_data_min = df["pus"].min()

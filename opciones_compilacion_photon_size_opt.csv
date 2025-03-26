@@ -1,0 +1,2 @@
+compiler,flags,lto,native
+clang,-Ofast,true,true

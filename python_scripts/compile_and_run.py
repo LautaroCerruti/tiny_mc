@@ -77,7 +77,7 @@ def ejecutar_headless(runs, nombre_ejecucion):
     for i in range(runs):
         print(f"Ejecución {i+1} de {runs}...")
         guardar_ejecucion(nombre_ejecucion)
-        cmd = "./headless -q -o ./results/photon_size_atom_opt.csv"
+        cmd = "./headless -q -o ./results/optimize_atom_intel.csv"
         resultado = subprocess.run(cmd, shell=True)
         if resultado.returncode != 0:
             print("Error al ejecutar headless.")
@@ -85,7 +85,7 @@ def ejecutar_headless(runs, nombre_ejecucion):
 
 def main():
     compilacion_csv = './opciones_compilacion.csv'
-    runs_csv = './runs_photon_size.csv'
+    runs_csv = './runs_optimize.csv'
 
     # Cargar el archivo runs.csv en una lista
     runs_list = []
