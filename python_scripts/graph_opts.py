@@ -2,15 +2,16 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # Leer el CSV
-df = pd.read_csv('./results/optimize_wflags_notebook.csv')
+df = pd.read_csv('./results/optimize_wflags_atom.csv')
 
 # Opcional: asegurar que las columnas numéricas sean de tipo float
 df['pus'] = pd.to_numeric(df['pus'], errors='coerce')
 df['photons'] = pd.to_numeric(df['photons'], errors='coerce')
 
-# Filtrar por compilador: gcc y clang
+# Filtrar por compilador: gcc, clang e icx
 df_gcc = df[df['compilador_flag'].str.contains('gcc', case=False)]
 df_clang = df[df['compilador_flag'].str.contains('clang', case=False)]
+df_icx = df[df['compilador_flag'].str.contains('icx', case=False)]
 
 def procesar_datos(data):
     # Agrupar por compilador_flag y photons, calculando promedio y máximo de pus
@@ -23,6 +24,7 @@ def procesar_datos(data):
 
 grouped_gcc = procesar_datos(df_gcc)
 grouped_clang = procesar_datos(df_clang)
+grouped_icx = procesar_datos(df_icx)
 
 def plot_metric(agrupado, compiler_label, metric='pus'):
     """
@@ -62,7 +64,7 @@ def plot_metric(agrupado, compiler_label, metric='pus'):
     plt.xticks(rotation=45)
     plt.legend()
     plt.grid(True)
-    plt.ylim(0.175, 0.7)  # Limitar el eje Y
+    plt.ylim(0.175, 0.86)  # Limitar el eje Y
     plt.tight_layout()
     
     # Guardar el gráfico en un archivo PNG y cerrar la figura
@@ -82,3 +84,9 @@ if not grouped_clang.empty:
     plot_metric(grouped_clang, 'Clang', metric='pus')
 else:
     print("No se encontraron datos para Clang.")
+
+# Graficar y guardar para ICX (si hay datos)
+if not grouped_icx.empty:
+    plot_metric(grouped_icx, 'ICX', metric='pus')
+else:
+    print("No se encontraron datos para ICX.")
