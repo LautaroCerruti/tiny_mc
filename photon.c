@@ -4,9 +4,6 @@
 #include "params.h"
 #include "xoshiro.h"
 
-#define likely(x)       __builtin_expect((x),1)
-#define unlikely(x)     __builtin_expect((x),0)
-
 void photon(float* heats, float* heats_squared)
 {
     const float albedo = MU_S / (MU_S + MU_A);
@@ -22,7 +19,9 @@ void photon(float* heats, float* heats_squared)
     float weight = 1.0f;
 
     for (;;) {
-        float t = -logf(next_float()); /* move */
+        float i1, i2;
+        next_two_floats(&i1, &i2);
+        float t = -logf(i1); /* move */
         x += t * u;
         y += t * v;
         z += t * w;
@@ -38,16 +37,18 @@ void photon(float* heats, float* heats_squared)
         /* New direction, rejection method */
         float xi1, xi2;
         do {
-            xi1 = 2.0f * next_float() - 1.0f;
-            xi2 = 2.0f * next_float() - 1.0f;
+            float x1, x2;
+            next_two_floats(&x1, &x2);
+            xi1 = 2.0f * x1 - 1.0f;
+            xi2 = 2.0f * x2 - 1.0f;
             t = xi1 * xi1 + xi2 * xi2;
         } while (1.0f < t);
         u = 2.0f * t - 1.0f;
         v = xi1 * sqrtf((1.0f - u * u) / t);
         w = xi2 * sqrtf((1.0f - u * u) / t);
 
-        if (unlikely(weight < 0.001f)) { /* roulette */
-            if (likely(next_float() > 0.1f))
+        if (weight < 0.001f) { /* roulette */
+            if (i2 > 0.1f)
                 break;
             weight /= 0.1f;
         }
