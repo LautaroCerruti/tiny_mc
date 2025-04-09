@@ -18,9 +18,11 @@ void photon(float* heats, float* heats_squared)
     float w = 1.0f;
     float weight = 1.0f;
 
+    float aux = (1.0f / (1U << 24));
     for (;;) {
         uint64_t r1 = next();
-        float t = -logf((r1 >> 40) * (1.0f / (1U << 24))); /* move */
+        float f1 = (r1 >> 40) * aux;
+        float t = -logf(f1); /* move */
         x += t * u;
         y += t * v;
         z += t * w;
@@ -37,8 +39,10 @@ void photon(float* heats, float* heats_squared)
         float xi1, xi2;
         do {
             uint64_t r2 = next();
-            xi1 = 2.0f * (r2 >> 40) * (1.0f / (1U << 24)) - 1.0f;
-            xi2 = 2.0f * ((r2 >> 8) & 0xFFFFFF) * (1.0f / (1U << 24)) - 1.0f;
+            float xf1 = (r2 >> 40) * aux;
+            float xf2 = ((r2 >> 8) & 0xFFFFFF) * aux;
+            xi1 = 2.0f * xf1 - 1.0f;
+            xi2 = 2.0f * xf2 - 1.0f;
             t = xi1 * xi1 + xi2 * xi2;
         } while (1.0f < t);
         u = 2.0f * t - 1.0f;
@@ -46,7 +50,8 @@ void photon(float* heats, float* heats_squared)
         w = xi2 * sqrtf((1.0f - u * u) / t);
 
         if (weight < 0.001f) { /* roulette */
-            if (((r1 >> 8) & 0xFFFFFF) * (1.0f / (1U << 24)) > 0.1f)
+            float f2 = ((r1 >> 8) & 0xFFFFFF) * aux;
+            if (f2 > 0.1f)
                 break;
             weight /= 0.1f;
         }
