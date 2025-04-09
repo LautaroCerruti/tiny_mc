@@ -135,13 +135,13 @@
          count = -1;
      }
      if (verbose) {
-         printf("Instrucciones ejecutadas: %lld\n", count);
+         printf("# Instrucciones ejecutadas: %lld\n", count);
      }
      close(fd);
  
      write_stat_file(output_filename, elapsed, count);
  
-     if (verbose) {
+     if (verbose & 0) {
          printf("# Radius\tHeat\n");
          printf("# [microns]\t[W/cm^3]\tError\n");
          float t = 4.0f * M_PI * powf(MICRONS_PER_SHELL, 3.0f) * PHOTONS / 1e12;
