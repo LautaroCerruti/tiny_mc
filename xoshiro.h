@@ -7,6 +7,8 @@
 // Inicializa el generador con la semilla proporcionada.
 void seed(uint64_t seed_val);
 
+uint64_t next(void);
+
 // Devuelve el siguiente número aleatorio en punto flotante en el rango [0,1).
 float next_float(void);
 
