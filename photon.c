@@ -19,9 +19,8 @@ void photon(float* heats, float* heats_squared)
     float weight = 1.0f;
 
     for (;;) {
-        float i1, i2;
-        next_two_floats(&i1, &i2);
-        float t = -logf(i1); /* move */
+        uint64_t r1 = next();
+        float t = -logf((r1 >> 40) * (1.0f / (1U << 24))); /* move */
         x += t * u;
         y += t * v;
         z += t * w;
@@ -37,10 +36,9 @@ void photon(float* heats, float* heats_squared)
         /* New direction, rejection method */
         float xi1, xi2;
         do {
-            float x1, x2;
-            next_two_floats(&x1, &x2);
-            xi1 = 2.0f * x1 - 1.0f;
-            xi2 = 2.0f * x2 - 1.0f;
+            uint64_t r2 = next();
+            xi1 = 2.0f * (r2 >> 40) * (1.0f / (1U << 24)) - 1.0f;
+            xi2 = 2.0f * ((r2 >> 8) & 0xFFFFFF) * (1.0f / (1U << 24)) - 1.0f;
             t = xi1 * xi1 + xi2 * xi2;
         } while (1.0f < t);
         u = 2.0f * t - 1.0f;
@@ -48,7 +46,7 @@ void photon(float* heats, float* heats_squared)
         w = xi2 * sqrtf((1.0f - u * u) / t);
 
         if (weight < 0.001f) { /* roulette */
-            if (i2 > 0.1f)
+            if (((r1 >> 8) & 0xFFFFFF) * (1.0f / (1U << 24)) > 0.1f)
                 break;
             weight /= 0.1f;
         }
