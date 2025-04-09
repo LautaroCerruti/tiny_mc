@@ -112,10 +112,10 @@ void next_two_floats(float *f1, float *f2) {
     *f2 = ((r >> 8) & 0xFFFFFF) * (1.0f / (1U << 24)); // Primeros 24 bits de la mitad baja
 }
 
-float array[4096];
+float array[32768];
 int index = 0;
 void fill_array() {
-	for (int i = 0; i < 4096; i += 2) {
+	for (int i = 0; i < 32768; i += 2) {
 		uint64_t r = next();
 		array[i] = (r >> 40) * (1.0f / (1U << 24));
 		array[i+1] = ((r >> 8) & 0xFFFFFF) * (1.0f / (1U << 24));
@@ -123,7 +123,7 @@ void fill_array() {
 }
 
 float next_float_from_array() {
-	if (index >= 4096) {
+	if (index >= 32768) {
 		fill_array();
 		index = 0;
 	}
