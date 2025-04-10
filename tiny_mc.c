@@ -20,9 +20,6 @@
  #include <unistd.h>
  #include <getopt.h>
  #include <string.h>
- #include <sys/ioctl.h>
- #include <linux/perf_event.h>
- #include <asm/unistd.h>
  #include <errno.h>
  
  char t1[] = "Tiny Monte Carlo by Scott Prahl (http://omlc.ogi.edu)";
@@ -34,7 +31,7 @@
  static float heat[SHELLS];
  static float heat2[SHELLS];
  
- int write_stat_file(const char *filename, double elapsed, long long count) {
+ int write_stat_file(const char *filename, double elapsed) {
      FILE *csvFile = fopen(filename, "r");
      if (csvFile == NULL) {
          csvFile = fopen(filename, "w");
@@ -42,38 +39,14 @@
              fprintf(stderr, "Error opening file %s\n", filename);
              return 1;
          }
-         fprintf(csvFile, "photons,time,pus,ins,ius\n");
+         fprintf(csvFile, "photons,time,pus\n");
      } else {
          fclose(csvFile);
          csvFile = fopen(filename, "a");
      }
-     fprintf(csvFile, "%i, %lf, %lf, %lld, %lf\n", PHOTONS, elapsed, PHOTONS / (elapsed * 1e6), count, count / (elapsed * 1e6));
+     fprintf(csvFile, "%i, %lf, %lf\n", PHOTONS, elapsed, PHOTONS / (elapsed * 1e6));
      fclose(csvFile);
      return 0;
- }
- 
- // Función helper para invocar la syscall perf_event_open
- static long perf_event_open(struct perf_event_attr *hw_event, pid_t pid, int cpu, int group_fd, unsigned long flags) {
-     return syscall(__NR_perf_event_open, hw_event, pid, cpu, group_fd, flags);
- }
- 
- void start_perf(int* fd) {
-     struct perf_event_attr pe;
-     memset(&pe, 0, sizeof(struct perf_event_attr));
-     pe.type = PERF_TYPE_HARDWARE;
-     pe.size = sizeof(struct perf_event_attr);
-     pe.config = PERF_COUNT_HW_INSTRUCTIONS;  // Contar instrucciones
-     pe.disabled = 1;
-     pe.exclude_kernel = 0;  // Incluir kernel
-     pe.exclude_hv = 0;      // Incluir hipervisor
- 
-     *fd = perf_event_open(&pe, 0, -1, -1, 0);
-     if (*fd == -1) {
-         fprintf(stderr, "Error al abrir perf_event: %s\n", strerror(errno));
-         exit(EXIT_FAILURE);
-     }
-     ioctl(*fd, PERF_EVENT_IOC_RESET, 0);
-     ioctl(*fd, PERF_EVENT_IOC_ENABLE, 0);
  }
  
  /***
@@ -110,10 +83,6 @@
          printf("# Photons    = %8d\n#\n", PHOTONS);
      }
  
-     long long count;
-     int fd;
-     start_perf(&fd);
- 
      double start = wtime();
      // simulation
      for (unsigned int i = 0; i < PHOTONS; ++i) {
@@ -123,23 +92,12 @@
      assert(start <= end);
      double elapsed = end - start;
  
-     // Deshabilitar contador
-     ioctl(fd, PERF_EVENT_IOC_DISABLE, 0);
- 
      if (verbose) {
          printf("# %lf seconds\n", elapsed);
          printf("# %lf photons per microseconds\n", PHOTONS / (elapsed * 1e6));
      }
  
-     if (read(fd, &count, sizeof(long long)) == -1) {
-         count = -1;
-     }
-     if (verbose) {
-         printf("# Instrucciones ejecutadas: %lld\n", count);
-     }
-     close(fd);
- 
-     write_stat_file(output_filename, elapsed, count);
+     write_stat_file(output_filename, elapsed);
  
      if (verbose & 0) {
          printf("# Radius\tHeat\n");
