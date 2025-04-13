@@ -1,0 +1,2 @@
+compiler,flags,lto,native
+icx,-O3,true,true

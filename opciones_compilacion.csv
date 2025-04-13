@@ -1,0 +1,16 @@
+compiler,flags,lto,native
+icx,-O0,false,false
+icx,-O1,false,false
+icx,-O2,false,false
+icx,-O3,false,false
+icx,-Ofast,false,false
+icx,-O0,true,false
+icx,-O1,true,false
+icx,-O2,true,false
+icx,-O3,true,false
+icx,-Ofast,true,false
+icx,-O0,true,true
+icx,-O1,true,true
+icx,-O2,true,true
+icx,-O3,true,true
+icx,-Ofast,true,true
