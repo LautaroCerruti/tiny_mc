@@ -115,10 +115,10 @@ void photon_vectorized(float* heats, float* heats_squared) {
             float sqrt_val = 2.0f * sqrtf(1.0f - t_val);
             v[i] = xi1 * sqrt_val;
             w[i] = xi2 * sqrt_val;
-
+            
+            weight[i] *= albedo;
+            
             if (active[i]) {
-                weight[i] *= albedo;
-
                 if (weight[i] < 0.001f) {
                     if (rands[i+BLOCK_SIZE*3] > 0.1f)
                         active[i] = 0;  // Se desactiva el fotón
