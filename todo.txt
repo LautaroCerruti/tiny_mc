@@ -8,7 +8,7 @@ Done:
         
     Version vectorial:
         - modificamos el codigo haciendo que trabaje por bloques y con arrays de tamaño de bloque para que el compilador pueda autovectorizarlo
-          la unica cosa que no es vectorial es la actualizacion del mapa de calor
+          la unica cosa que no es vectorial es la actualizacion del mapa de calor, pero el peso a sumar a cada array de heat se calcula de forma vectorial
 To do:
     - Adaptar los codigos en python para las nuevas pruebas y formatos de salida
     - evaluar el rendimiento de la nueva version no vectorial despues de los cambios para un N

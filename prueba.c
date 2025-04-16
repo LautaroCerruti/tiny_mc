@@ -84,6 +84,7 @@ void photon_vectorized(float* heats, float* heats_squared) {
         photons_remaining = 0;
         float rands[BLOCK_SIZE*4];
         next_float_vector_4_times_block(rands);
+        float h[BLOCK_SIZE];
         for (int i = 0; i < BLOCK_SIZE; i++) {
             float t;
             t = -logf(rands[i]);
@@ -93,13 +94,13 @@ void photon_vectorized(float* heats, float* heats_squared) {
             shell[i] = (unsigned int)(sqrtf(x[i] * x[i] + y[i] * y[i] + z[i] * z[i]) * shells_per_mfp);
             if (shell[i] >= SHELLS)
                 shell[i] = SHELLS - 1;
-            
+            h[i] = (1.0f - albedo) * weight[i];
         }
 
         for (int i = 0; i < BLOCK_SIZE; i++) {
             if (active[i]) {
-                heats[shell[i]] += (1.0f - albedo) * weight[i];
-                heats_squared[shell[i]] += (1.0f - albedo) * (1.0f - albedo) * weight[i] * weight[i];
+                heats[shell[i]] += h[i];
+                heats_squared[shell[i]] += h[i]*h[i];
             }
         }
 
