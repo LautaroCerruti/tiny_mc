@@ -5,6 +5,7 @@
 
 #include "params.h"
 #include "xoshiro.h"
+#define PI 3.14159265358979323846f
 
 static float heat[SHELLS];
 static float heat2[SHELLS];
@@ -37,7 +38,6 @@ void photon(float* heats, float* heats_squared)
         heats_squared[shell] += (1.0f - albedo) * (1.0f - albedo) * weight * weight; /* add up squares */
         weight *= albedo;
 
-        /* New direction, rejection method */
         float xi1, xi2;
         do {
             xi1 = 2.0f * next_float() - 1.0f;
@@ -68,7 +68,7 @@ void photon_vectorized(float* heats, float* heats_squared) {
     int active[BLOCK_SIZE];
 
     unsigned int shell[BLOCK_SIZE];
-    // Inicialización de estados: se asume que todos los fotones parten en el origen con dirección (0,0,1)
+    
     // Se vectoriza el siguiente for
     for (int i = 0; i < BLOCK_SIZE; i++) {
         w[i] = 1.0f;
@@ -82,21 +82,18 @@ void photon_vectorized(float* heats, float* heats_squared) {
     int photons_remaining = BLOCK_SIZE;
     while (photons_remaining > 0) {
         photons_remaining = 0;
-        float t[BLOCK_SIZE];
-        // Paso 1: Movimiento y absorción
+        float rands[BLOCK_SIZE*4];
+        next_float_vector_4_times_block(rands);
         for (int i = 0; i < BLOCK_SIZE; i++) {
-            if (active[i]) {
-                t[i] = -logf(next_float());  // Longitud de paso, usando el generador actual
-            }
-        }
-        // se vectoriza el siguiente for
-        for (int i = 0; i < BLOCK_SIZE; i++) {
-            x[i] += t[i] * u[i];
-            y[i] += t[i] * v[i];
-            z[i] += t[i] * w[i];
+            float t;
+            t = -logf(rands[i]);
+            x[i] += t * u[i];
+            y[i] += t * v[i];
+            z[i] += t * w[i];
             shell[i] = (unsigned int)(sqrtf(x[i] * x[i] + y[i] * y[i] + z[i] * z[i]) * shells_per_mfp);
             if (shell[i] >= SHELLS)
                 shell[i] = SHELLS - 1;
+            
         }
 
         for (int i = 0; i < BLOCK_SIZE; i++) {
@@ -108,44 +105,25 @@ void photon_vectorized(float* heats, float* heats_squared) {
 
         // Se vectoriza el siguiente for
         for (int i = 0; i < BLOCK_SIZE; i++) {
-            weight[i] *= albedo;
-        }
+            float r, theta, xi1, xi2, t_val;
+            t_val = rands[i+BLOCK_SIZE];
+            r = sqrtf(t_val);
+            theta = 2.0f * PI * rands[i+BLOCK_SIZE*2];
+            xi1 = r * cosf(theta);
+            xi2 = r * sinf(theta);
+            u[i] = 2.0f * t_val - 1.0f;
+            float sqrt_val = 2.0f * sqrtf(1.0f - t_val);
+            v[i] = xi1 * sqrt_val;
+            w[i] = xi2 * sqrt_val;
 
-        float t_val[BLOCK_SIZE], xi1[BLOCK_SIZE], xi2[BLOCK_SIZE];
-        // Paso 2: Cambio de dirección usando el método de rechazo
-        for (int i = 0; i < BLOCK_SIZE; i++) {
             if (active[i]) {
-                // Bucle de rechazo: se repite hasta obtener un valor de t_val en (0,1]
-                do {
-                    xi1[i] = 2.0f * next_float() - 1.0f;
-                    xi2[i] = 2.0f * next_float() - 1.0f;
-                    t_val[i] = xi1[i] * xi1[i] + xi2[i] * xi2[i];
-                } while (t_val[i] > 1.0f || t_val[i] == 0.0f);
-            }
-        }
+                weight[i] *= albedo;
 
-        // Se vectoriza el siguiente for
-        for (int i = 0; i < BLOCK_SIZE; i++) {
-            u[i] = 2.0f * t_val[i] - 1.0f;
-            float sqrt_val = sqrtf((1.0f - u[i] * u[i]) / t_val[i]);
-            v[i] = xi1[i] * sqrt_val;
-            w[i] = xi2[i] * sqrt_val;
-        }
-
-        float roulette[BLOCK_SIZE];
-        for (int i = 0; i < BLOCK_SIZE; i++) {
-            if (active[i])
-                roulette[i] = next_float();
-        }
-
-        // Se vectoriza el siguiente for
-        for (int i = 0; i < BLOCK_SIZE; i++) {
-            if (active[i]) {
                 if (weight[i] < 0.001f) {
-                    if (roulette[i] > 0.1f)
+                    if (rands[i+BLOCK_SIZE*3] > 0.1f)
                         active[i] = 0;  // Se desactiva el fotón
                     else {
-                        weight[i] /= 0.1f;
+                        weight[i] *= 10.0f;
                     }
                 }
             }
@@ -160,7 +138,7 @@ void photon_vectorized(float* heats, float* heats_squared) {
   ***/
  int main()
  {
-    seed((uint64_t) SEED);
+    seed_vector((uint64_t) SEED);
     double t = omp_get_wtime();
     for (unsigned int i = 0; i < PHOTONS; ++i) {
         photon(heat, heat2);
@@ -172,5 +150,6 @@ void photon_vectorized(float* heats, float* heats_squared) {
         photon_vectorized(heat, heat2);
     }
     printf("phonot vectorized: %lf\n", (omp_get_wtime()-t));
+
     return (int)heat[0];
  }

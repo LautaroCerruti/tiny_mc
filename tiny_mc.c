@@ -54,7 +54,7 @@
   ***/
  int main(int argc, char *argv[])
  {
-    seed((uint64_t) SEED);
+    seed_vector((uint64_t) SEED);
      // Variables para la línea de comandos
      const char *output_filename = "resultados.csv";
      int verbose = 1;  // 1: imprimir en pantalla, 0: modo quiet
@@ -86,7 +86,7 @@
      double start = wtime();
      // simulation
      for (unsigned int i = 0; i < PHOTONS; ++i) {
-         photon(heat, heat2);
+        photon(heat, heat2);
      }
      double end = wtime();
      assert(start <= end);
@@ -99,7 +99,7 @@
  
      write_stat_file(output_filename, elapsed);
  
-     if (verbose & 0) {
+     if (verbose) {
          printf("# Radius\tHeat\n");
          printf("# [microns]\t[W/cm^3]\tError\n");
          float t = 4.0f * M_PI * powf(MICRONS_PER_SHELL, 3.0f) * PHOTONS / 1e12;

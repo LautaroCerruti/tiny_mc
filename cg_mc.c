@@ -89,7 +89,7 @@ void update(void)
 
 int main(void)
 {
-    seed((uint64_t) SEED);
+    seed_vector((uint64_t) SEED);
     glfwInit();
 
     glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);

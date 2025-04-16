@@ -1,18 +1,17 @@
-1) hacer un script de python que genere una gráfica a partir de los resultados
-2) decidir que tamaños de tests y cuantas veces vamos a correr cada uno
-
-Usar 2 pcs, usar gcc y clang, las opciones [O0, O1, O2, O3, Ofast] y alguna otra si hay, 
-native y no native, mejora random y log si es posible.
-
-lo mas logico me parece que para las optimizaciones probar ambos compiladores hacer:
-opcion de optimizacion, optimizacion + native y optimizacion + native + lto
-esto haria que sean 15 posibles combinaciones para cada compi, 30 en total
-esto lo correria unas pocas veces para un valor muy grande en cada PC.
-Esto nos dejaria con 2/4 graficas, divididas por pc o por pc+compilador.
-
-Despues haria otra gráfica mostrando como escala el mejor programa obtenido con las 
-optimizaciones segun el tamaño del problema, esto en cada PC son 2 gráficas mas.
-
-La parte de optimizacion de código se puede hacer al pricipio o al final, si lo hacemos al 
-final podemos sumar a la grafica de escalado por tamaño como seria con las optimizaciones de código, 
-mostrando que tanto mejor es.
+Done:
+    Cosas que afectan a la version no vectorial:
+        - reemplazamos la division por 0.1f por una multiplicacion por 10.0f en la actualizacion de los pesos.
+        - hicimos una optimizacion matematica, reemplazando sqrtf((1.0f - u * u) / t) por 2.0f * sqrtf(1.0f - t).
+        - probamos usar en lugar del metodo de rechazo, generar el punto en el cuadrado pero llevarlo a un punto dentro del circulo, pero nos dimos cuenta que afectactaba la uniformidad de la distribucion.
+        - cambiamos el metodo para obtener la nueva direccion, en lugar de utilizar rechazo, usamos coordenadas polares (ya que esto es vectorizable).
+        - cambiamos el modulo del xoshiro para que sea vectorizable, pero mantuvimos una funcion no vectorial para compatibilidad.
+        
+    Version vectorial:
+        - modificamos el codigo haciendo que trabaje por bloques y con arrays de tamaño de bloque para que el compilador pueda autovectorizarlo
+          la unica cosa que no es vectorial es la actualizacion del mapa de calor
+To do:
+    - Adaptar los codigos en python para las nuevas pruebas y formatos de salida
+    - evaluar el rendimiento de la nueva version no vectorial despues de los cambios para un N
+    - probar diferentes combinaciones de flags sobre la version vectorial, intentando que -O3 y -Ofast vectoricen
+      (tener en cuenta que -march=native, ffast-math y flto tienen que estar siempre activas porque si no no vectoriza)
+    - probar con profile guided optimizations

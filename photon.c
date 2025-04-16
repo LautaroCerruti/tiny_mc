@@ -4,6 +4,8 @@
 #include "params.h"
 #include "xoshiro.h"
 
+#define PI 3.14159265358979323846f
+
 void photon(float* heats, float* heats_squared)
 {
     const float albedo = MU_S / (MU_S + MU_A);
@@ -32,21 +34,22 @@ void photon(float* heats, float* heats_squared)
         heats_squared[shell] += (1.0f - albedo) * (1.0f - albedo) * weight * weight; /* add up squares */
         weight *= albedo;
 
-        /* New direction, rejection method */
-        float xi1, xi2;
-        do {
-            xi1 = 2.0f * next_float() - 1.0f;
-            xi2 = 2.0f * next_float() - 1.0f;
-            t = xi1 * xi1 + xi2 * xi2;
-        } while (1.0f < t);
+        float r, theta, xi1, xi2;
+        t = next_float();
+        r = sqrtf(t);
+        theta = 2.0f * PI * next_float();
+        xi1 = r * cosf(theta);
+        xi2 = r * sinf(theta);
+
         u = 2.0f * t - 1.0f;
-        v = xi1 * sqrtf((1.0f - u * u) / t);
-        w = xi2 * sqrtf((1.0f - u * u) / t);
+        float sqrt_val = 2.0f * sqrtf(1.0f - t);
+        v = xi1 * sqrt_val;
+        w = xi2 * sqrt_val;
 
         if (weight < 0.001f) { /* roulette */
             if (next_float() > 0.1f)
                 break;
-            weight /= 0.1f;
+            weight *= 10.0f;
         }
     }
 }

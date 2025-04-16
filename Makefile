@@ -2,7 +2,7 @@
 CC = gcc
 
 # Flags
-CFLAGS = -std=c11 -Wall -Wextra -Ofast -march=native -flto
+CFLAGS = -std=c11 -Wall -Wextra -g -O2 -ffast-math -march=native -flto
 TINY_LDFLAGS = -lm 
 CG_LDFLAGS = -lm -lglfw -lGL -lGLEW
 
