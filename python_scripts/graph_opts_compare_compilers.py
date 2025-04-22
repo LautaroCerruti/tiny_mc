@@ -3,11 +3,11 @@ import matplotlib.pyplot as plt
 import re
 
 # Parámetros configurables
-photons_value = 1048576  # Cambia este valor según lo que necesites
+photons_value = 16777216  # Cambia este valor según lo que necesites
 metric_choice = 'max'   # Usa 'mean' para promedio o 'max' para máximo
 
 # Leer el CSV
-df = pd.read_csv('./results/optimize_wflags_atom.csv')
+df = pd.read_csv('./results/lab2/atom_optimize_flags.csv')
 
 # Convertir las columnas a numérico
 df['pus'] = pd.to_numeric(df['pus'], errors='coerce')

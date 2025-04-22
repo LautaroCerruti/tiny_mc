@@ -3,9 +3,9 @@ import matplotlib.pyplot as plt
 
 # Diccionario con etiquetas y rutas de los archivos
 files = {
-    'Lab1': './results/lab2/notebook_test_speed_lab1.csv',
-    'SinCos': './results/lab2/notebook_test_speed_sincos.csv',
-    'Vectorized': './results/lab2/notebook_test_speed_vectorized.csv'
+    'Lab1': './results/lab2/atom_test_speed_lab1.csv',
+    'SinCos': './results/lab2/atom_test_speed_sincos.csv',
+    'Vectorized': './results/lab2/atom_test_speed_vectorized.csv'
 }
 
 

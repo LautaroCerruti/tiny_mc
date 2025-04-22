@@ -20,3 +20,6 @@ head: cg_mc.o $(C_OBJS)
 
 clean:
 	rm -f $(TARGETS) *.o
+
+cleangcda:
+	rm -f *.gcda
