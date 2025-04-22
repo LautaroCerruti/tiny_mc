@@ -118,7 +118,8 @@ void photon_vectorized(float* heats, float* heats_squared) {
             w[i] = xi2 * sqrt_val;
             
             weight[i] *= albedo;
-            
+        }
+        for (int i = 0; i < BLOCK_SIZE; i++) {
             if (active[i]) {
                 if (weight[i] < 0.001f) {
                     if (rands[i+BLOCK_SIZE*3] > 0.1f)

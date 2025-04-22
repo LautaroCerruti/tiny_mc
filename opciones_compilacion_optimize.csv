@@ -1,46 +1,15 @@
-compiler,flags,lto,native
-gcc,-O0,false,false
-gcc,-O1,false,false
-gcc,-O2,false,false
-gcc,-O3,false,false
-gcc,-Ofast,false,false
-gcc,-O0,true,false
-gcc,-O1,true,false
-gcc,-O2,true,false
-gcc,-O3,true,false
-gcc,-Ofast,true,false
-gcc,-O0,true,true
-gcc,-O1,true,true
-gcc,-O2,true,true
-gcc,-O3,true,true
-gcc,-Ofast,true,true
-clang,-O0,false,false
-clang,-O1,false,false
-clang,-O2,false,false
-clang,-O3,false,false
-clang,-Ofast,false,false
-clang,-O0,true,false
-clang,-O1,true,false
-clang,-O2,true,false
-clang,-O3,true,false
-clang,-Ofast,true,false
-clang,-O0,true,true
-clang,-O1,true,true
-clang,-O2,true,true
-clang,-O3,true,true
-clang,-Ofast,true,true
-icx,-O0,false,false
-icx,-O1,false,false
-icx,-O2,false,false
-icx,-O3,false,false
-icx,-Ofast,false,false
-icx,-O0,true,false
-icx,-O1,true,false
-icx,-O2,true,false
-icx,-O3,true,false
-icx,-Ofast,true,false
-icx,-O0,true,true
-icx,-O1,true,true
-icx,-O2,true,true
-icx,-O3,true,true
-icx,-Ofast,true,true
+compiler,base_flags,flags
+gcc,-march=native -flto -ffast-math -ftree-vectorize,-O1
+gcc,-march=native -flto -ffast-math -ftree-vectorize,-O2
+gcc,-march=native -flto -ffast-math -ftree-vectorize,-O3
+gcc,-march=native -flto -ffast-math -ftree-vectorize,-O3 -fdisable-tree-cunrolli
+gcc,-march=native -flto -ffast-math -ftree-vectorize,-Ofast
+gcc,-march=native -flto -ffast-math -ftree-vectorize,-Ofast -fdisable-tree-cunrolli
+icx,-xHost -ipo -vec -ffast-math,-O1
+icx,-xHost -ipo -vec -ffast-math,-O1 -fno-unroll-loops
+icx,-xHost -ipo -vec -ffast-math,-O2
+icx,-xHost -ipo -vec -ffast-math,-O2 -fno-unroll-loops
+icx,-xHost -ipo -vec -ffast-math,-O3
+icx,-xHost -ipo -vec -ffast-math,-O3 -fno-unroll-loops
+icx,-xHost -ipo -vec -ffast-math,-Ofast
+icx,-xHost -ipo -vec -ffast-math,-Ofast -fno-unroll-loops
