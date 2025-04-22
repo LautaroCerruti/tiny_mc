@@ -11,5 +11,3 @@ icx,-xHost -ipo -vec -ffast-math,-O2
 icx,-xHost -ipo -vec -ffast-math,-O2 -fno-unroll-loops
 icx,-xHost -ipo -vec -ffast-math,-O3
 icx,-xHost -ipo -vec -ffast-math,-O3 -fno-unroll-loops
-icx,-xHost -ipo -vec -ffast-math,-Ofast
-icx,-xHost -ipo -vec -ffast-math,-Ofast -fno-unroll-loops

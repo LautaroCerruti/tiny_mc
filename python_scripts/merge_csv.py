@@ -3,8 +3,8 @@ from itertools import cycle
 
 # Nombres de los archivos de entrada y salida
 flags_file = './results/registro_flags.csv'
-opt_file = './results/atom_test_speed_vectorized.csv'
-output_file = './results/atom_test_speed_vectorized_merged.csv'
+opt_file = './results/atom_optimize_flags.csv'
+output_file = './results/atom_optimize_flags_merged.csv'
 
 # Leer el CSV de flags
 with open(flags_file, newline='') as f:
