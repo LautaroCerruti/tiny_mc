@@ -84,15 +84,6 @@
      }
  
      double start = wtime();
-     // simulation
-    //  for (unsigned int i = 0; i < PHOTONS; ++i) {
-    //     photon_lab1(heat, heat2);
-    //  }
-
-    //  for (unsigned int i = 0; i < PHOTONS; ++i) {
-    //     photon(heat, heat2);
-    //  }
-
      for (unsigned int i = 0; i < PHOTONS/BLOCK_SIZE; ++i) {
         photon_vectorized(heat, heat2);
      }
