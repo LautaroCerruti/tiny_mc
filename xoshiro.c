@@ -9,7 +9,7 @@ static inline uint64_t rotl(const uint64_t x, int k) {
 }
 
 // Estado interno del generador.
-static uint64_t s[4][BLOCK_SIZE];
+static uint64_t s[4][BLOCK_SIZE] __attribute__((aligned(64)));
 
 // Función interna para generar el siguiente número aleatorio (entero de 64 bits).
 void next_vector(uint64_t *array, int n) {
@@ -49,7 +49,7 @@ void next_vector(uint64_t *array, int n) {
 }
 
 void next_float_vector_4_times_block(float *array1) {
-    uint64_t temp[BLOCK_SIZE*2];
+    uint64_t temp[BLOCK_SIZE*2] __attribute__((aligned(64)));
     for (int b = 0; b < BLOCK_SIZE*2; b += BLOCK_SIZE) {
         // Para cada lane se genera el entero aleatorio.
         for (int i = 0; i < BLOCK_SIZE; i++) {

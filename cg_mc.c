@@ -78,10 +78,10 @@ void update(void)
     int remaining_photons_in_frame = MAX_PHOTONS_PER_FRAME;
 
     while (remaining_photons > 0 && remaining_photons_in_frame > 0) {
-        remaining_photons-=BLOCK_SIZE;
-        remaining_photons_in_frame-=BLOCK_SIZE;
+        remaining_photons-=BLOCK_SIZE*2;
+        remaining_photons_in_frame-=BLOCK_SIZE*2;
 
-        photon_vectorized(heats, _heats_squared);
+        photon_vectorized(heats, _heats_squared, BLOCK_SIZE*2);
     }
 
     glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, sizeof(heats), heats);

@@ -28,8 +28,8 @@
              " and Nicolas Wolovick";
  
  // global state, heat and heat square in each shell
- static float heat[SHELLS];
- static float heat2[SHELLS];
+ static float heat[SHELLS] __attribute__((aligned(64)));
+ static float heat2[SHELLS] __attribute__((aligned(64)));
  
  int write_stat_file(const char *filename, double elapsed) {
      FILE *csvFile = fopen(filename, "r");
@@ -84,9 +84,10 @@
      }
  
      double start = wtime();
-     for (unsigned int i = 0; i < PHOTONS/BLOCK_SIZE; ++i) {
-        photon_vectorized(heat, heat2);
-     }
+    //  for (unsigned int i = 0; i < PHOTONS/BLOCK_SIZE; ++i) {
+    //     photon_vectorized(heat, heat2);
+    //  }
+    photon_vectorized(heat, heat2, PHOTONS);
      double end = wtime();
      assert(start <= end);
      double elapsed = end - start;
@@ -98,7 +99,7 @@
  
      write_stat_file(output_filename, elapsed);
  
-     if (verbose) {
+     if (verbose && 0) {
          printf("# Radius\tHeat\n");
          printf("# [microns]\t[W/cm^3]\tError\n");
          float t = 4.0f * M_PI * powf(MICRONS_PER_SHELL, 3.0f) * PHOTONS / 1e12;
