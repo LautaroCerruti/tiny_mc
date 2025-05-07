@@ -7,7 +7,6 @@
 #include "params.h"
 #include "xoshiro.h"
 #define PI 3.14159265358979323846f
-#define MAGIC_N 10
 
 static float heat[SHELLS] __attribute__((aligned(64)));
 static float heat2[SHELLS] __attribute__((aligned(64)));
@@ -1159,9 +1158,9 @@ void photon_vectorized_prueba_v12_arrays_for_lanes(float *__restrict__ heats, fl
     // photon_vectorized_prueba_v10_all_int(heat, heat2, PHOTONS);
     // printf("photon vectorized prueba v10 all int: %lf\n", (omp_get_wtime()-time));
 
-    time = omp_get_wtime();
-    photon_vectorized_prueba_v11_all_short(heat, heat2, PHOTONS);
-    printf("photon vectorized prueba v11 all short: %lf\n", (omp_get_wtime()-time));
+    // time = omp_get_wtime();
+    // photon_vectorized_prueba_v11_all_short(heat, heat2, PHOTONS);
+    // printf("photon vectorized prueba v11 all short: %lf\n", (omp_get_wtime()-time));
 
     // time = omp_get_wtime();
     // photon_vectorized_prueba_v12_arrays_for_lanes(heat, heat2, PHOTONS);

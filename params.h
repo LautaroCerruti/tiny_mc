@@ -29,3 +29,7 @@
 #ifndef BLOCK_SIZE
 #define BLOCK_SIZE 8
 #endif
+
+#ifndef MAGIC_N
+#define MAGIC_N 10
+#endif

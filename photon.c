@@ -4,7 +4,6 @@
 #include "params.h"
 #include "xoshiro.h"
 
-#define MAGIC_N 8
 #define PI 3.14159265358979323846f
 
 void photon_vectorized(float *__restrict__ heats, float *__restrict__ heats_squared, unsigned int simulationCount) {
