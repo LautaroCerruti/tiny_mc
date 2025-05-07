@@ -3,7 +3,7 @@ import os
 
 # ——— Configuración ———
 compiler       = "icx"
-base_flags     = "-std=c11 -Wall -Wextra -g -O2 -ffast-math -ftree-vectorize -xHost -ipo -fno-unroll-loops"
+base_flags     = "-std=c11 -Wall -Wextra -g -O3 -ffast-math -ftree-vectorize -xHost -ipo -fno-unroll-loops"
 generate_flag  = "-fprofile-sample-generate"
 use_flag       = "-fprofile-sample-use=headless.freq.prof -mllvm -unpredictable-hints-file=headless.misp.prof"
 profgen_tool  = "/opt/intel/oneapi/compiler/latest/bin/compiler/llvm-profgen"

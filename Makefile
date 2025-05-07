@@ -1,6 +1,6 @@
 # Compilers
-CC = gcc
-#CC = icx
+#CC = gcc
+CC = icx
 #CC = clang
 
 # Flags
@@ -13,9 +13,9 @@ EXTRAFLAGS =
 #EXTRAFLAGS = -Rpass=loop-vectorize -Rpass-missed=loop-vectorize -Rpass-analysis=loop-vectorize -fsave-optimization-record
 
 # Flags gcc
-CFLAGS = -std=c11 -Wall -Wextra -Ofast -ffast-math -fdisable-tree-cunrolli -ftree-vectorize -march=native -flto 
+#CFLAGS = -std=c11 -Wall -Wextra -Ofast -ffast-math -fdisable-tree-cunrolli -ftree-vectorize -march=native -flto 
 # Flags icx
-#CFLAGS = -std=c11 -Wall -Wextra -O3 -ffast-math -vec -xHost -ipo -fno-unroll-loops
+CFLAGS = -std=c11 -Wall -Wextra -O3 -ffast-math -vec -xHost -ipo -fno-unroll-loops
 # Flags clang
 #CFLAGS = -std=c11 -Wall -Wextra -Ofast -ffast-math -fvectorize -march=native -flto -Rpass=loop-vectorize -Rpass-missed=loop-vectorize -Rpass-analysis=loop-vectorize -fsave-optimization-record
 
