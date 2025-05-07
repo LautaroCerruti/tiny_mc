@@ -31,7 +31,7 @@ void photon_vectorized(float *__restrict__ heats, float *__restrict__ heats_squa
     const float albedo = MU_S / (MU_S + MU_A);
     const float shells_per_mfp = 1e4f / MICRONS_PER_SHELL / (MU_A + MU_S);
 
-    unsigned int hasToSim = 1;
+    unsigned short hasToSim = 1;
     while (hasToSim > 0) {
         float rands[BLOCK_SIZE*4] __attribute__((aligned(64)));
         next_float_vector_4_times_block(rands);
@@ -66,7 +66,7 @@ void photon_vectorized(float *__restrict__ heats, float *__restrict__ heats_squa
         }
 
         if (hasToSim == BLOCK_SIZE) {
-            // gcc ??????
+            // gcc se vectoriza el siguiente for 16 byte
             // ICX se vectoriza el siguiente for
             for (unsigned int i = 0; i < BLOCK_SIZE; i++) {
                 shell_update[update_count+i] = shell[i];
@@ -117,7 +117,7 @@ void photon_vectorized(float *__restrict__ heats, float *__restrict__ heats_squa
                 }
             }
         }
-        // se vectoriza el siguiente for 32 byte
+        // se vectoriza el siguiente for 16 byte
         // ICX se vectoriza el siguiente for
         for (int i = 0; i < BLOCK_SIZE; i++) {
             if(simPerTrack[i])
