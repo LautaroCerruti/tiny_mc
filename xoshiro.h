@@ -5,13 +5,11 @@
 // Xoshiro256+ utilizado para generar numeros de coma flotante en el rango [0,1).
 
 // Inicializa el generador con la semilla proporcionada.
-void seed(uint64_t seed_val);
+void seed_vector(uint64_t seed_val);
 
 // Devuelve el siguiente número aleatorio en punto flotante en el rango [0,1).
 float next_float(void);
 
-// Funciones de salto para uso en computación paralela (si son necesarias).
-void jump(void);
-void long_jump(void);
+void next_float_vector_4_times_block(float *array1);
 
 #endif // XOSHIRO_H

@@ -22,14 +22,15 @@
  #include <string.h>
  #include <errno.h>
  
+
  char t1[] = "Tiny Monte Carlo by Scott Prahl (http://omlc.ogi.edu)";
  char t2[] = "1 W Point Source Heating in Infinite Isotropic Scattering Medium";
  char t3[] = "CPU version, adapted for PEAGPGPU by Gustavo Castellano"
              " and Nicolas Wolovick";
  
  // global state, heat and heat square in each shell
- static float heat[SHELLS];
- static float heat2[SHELLS];
+ static float heat[SHELLS] __attribute__((aligned(64)));
+ static float heat2[SHELLS] __attribute__((aligned(64)));
  
  int write_stat_file(const char *filename, double elapsed) {
      FILE *csvFile = fopen(filename, "r");
@@ -54,10 +55,10 @@
   ***/
  int main(int argc, char *argv[])
  {
-    seed((uint64_t) SEED);
+    seed_vector((uint64_t) SEED);
      // Variables para la línea de comandos
      const char *output_filename = "resultados.csv";
-     int verbose = 1;  // 1: imprimir en pantalla, 0: modo quiet
+     int verbose = 1;  // 2: imprimir todo, 1: imprimir result tiempo, 0: modo quiet
  
      int opt;
      // Se reconocen las opciones -o para archivo y -q para modo silencioso
@@ -76,21 +77,18 @@
      }
  
      // Impresión de cabecera si verbose está activado
-     if (verbose) {
+     if (verbose==2) {
          printf("# %s\n# %s\n# %s\n", t1, t2, t3);
          printf("# Scattering = %8.3f/cm\n", MU_S);
          printf("# Absorption = %8.3f/cm\n", MU_A);
          printf("# Photons    = %8d\n#\n", PHOTONS);
      }
  
-     double start = wtime();
-     // simulation
-     for (unsigned int i = 0; i < PHOTONS; ++i) {
-         photon(heat, heat2);
-     }
-     double end = wtime();
-     assert(start <= end);
-     double elapsed = end - start;
+    double start = wtime();
+    photon_vectorized(heat, heat2, PHOTONS);
+    double end = wtime();
+    assert(start <= end);
+    double elapsed = end - start;
  
      if (verbose) {
          printf("# %lf seconds\n", elapsed);
@@ -99,7 +97,7 @@
  
      write_stat_file(output_filename, elapsed);
  
-     if (verbose & 0) {
+     if (verbose==2) {
          printf("# Radius\tHeat\n");
          printf("# [microns]\t[W/cm^3]\tError\n");
          float t = 4.0f * M_PI * powf(MICRONS_PER_SHELL, 3.0f) * PHOTONS / 1e12;

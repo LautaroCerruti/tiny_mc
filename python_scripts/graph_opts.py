@@ -2,7 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # Leer el CSV
-df = pd.read_csv('./results/optimize_wflags_atom.csv')
+df = pd.read_csv('./results/lab2/notebook_optimize_flags.csv')
 
 # Opcional: asegurar que las columnas numéricas sean de tipo float
 df['pus'] = pd.to_numeric(df['pus'], errors='coerce')
@@ -64,7 +64,7 @@ def plot_metric(agrupado, compiler_label, metric='pus'):
     plt.xticks(rotation=45)
     plt.legend()
     plt.grid(True)
-    plt.ylim(0.175, 0.86)  # Limitar el eje Y
+    plt.ylim(0, 1.8)  # Limitar el eje Y
     plt.tight_layout()
     
     # Guardar el gráfico en un archivo PNG y cerrar la figura

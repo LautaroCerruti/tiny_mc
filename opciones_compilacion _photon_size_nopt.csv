@@ -1,2 +1,0 @@
-compiler,flags,lto,native
-gcc,-O0,false,false

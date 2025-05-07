@@ -4,23 +4,21 @@ import numpy as np
 
 # Definir la lista de archivos y sus etiquetas
 files = [
-    {"path": "./results/photon_size_atom.csv", "label": "Atom rand()"},
-    {"path": "./results/photon_size_atom_opt.csv", "label": "Atom rand() opt"},
-    {"path": "./results/photon_size_atom_xoshiro.csv", "label": "Atom xoshiro256+"},
-    {"path": "./results/photon_size_atom_xoshiro_opt.csv", "label": "Atom xoshiro256+ opt"},
-    {"path": "./results/photon_size_notebook.csv", "label": "Local rand()"},
-    {"path": "./results/photon_size_notebook_opt.csv", "label": "Local rand() opt"},
-    {"path": "./results/photon_size_notebook_xoshiro.csv", "label": "Local xoshiro256+"},
-    {"path": "./results/photon_size_notebook_xoshiro_opt.csv", "label": "Local xoshiro256+ opt"}
+    {"path": "./results/lab1/photon_size_atom_xoshiro_opt.csv", "label": "Atom Lab1"},
+    {"path": "./results/lab2/atom_best_flag.csv", "label": "Atom Vectorized"},
+    {"path": "./results/lab2/atom_pgo_gcc.csv", "label": "Atom Vectorized + PGO"},
+    {"path": "./results/lab1/photon_size_notebook_xoshiro_opt.csv", "label": "Local Lab1"},
+    {"path": "./results/lab2/notebook_best_flag.csv", "label": "Local Vectorized"},
+    {"path": "./results/lab2/notebook_pgo_icx.csv", "label": "Local Vectorized + PGO"}
 ]
 
 max_pus_values = []
 labels = []
 
-# Filtrar y obtener el máximo de la columna "pus" solo para filas donde "photons" es 1048576
+# Filtrar y obtener el máximo de la columna "pus" solo para filas donde "photons" es 16777216
 for f in files:
     df = pd.read_csv(f["path"], skipinitialspace=True)
-    df_filtered = df[df["photons"] == 1048576]
+    df_filtered = df[df["photons"] == 16777216]
     max_val = df_filtered["pus"].max()
     max_pus_values.append(max_val)
     labels.append(f["label"])
@@ -34,7 +32,7 @@ bars = ax.bar(x, max_pus_values, width=width, color="purple", alpha=0.8)
 
 # Configurar el gráfico
 ax.set_ylabel("Máximo P/µs")
-ax.set_title("Máximos de P/µs (photons = 1048576) por archivo")
+ax.set_title("Máximos de P/µs (photons = 16777216) por archivo")
 ax.set_xticks(x)
 ax.set_xticklabels(labels, rotation=45, ha="right")
 

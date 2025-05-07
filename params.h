@@ -7,7 +7,7 @@
 #endif
 
 #ifndef PHOTONS
-#define PHOTONS 33554432
+#define PHOTONS 16777216 // number of photons
 #endif
 
 #ifndef MU_A
@@ -26,3 +26,10 @@
 #define SEED (time(NULL)) // random seed
 #endif
 
+#ifndef BLOCK_SIZE
+#define BLOCK_SIZE 8
+#endif
+
+#ifndef MAGIC_N
+#define MAGIC_N 8
+#endif

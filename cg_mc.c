@@ -8,8 +8,8 @@
 #include "photon.h"
 #include "xoshiro.h"
 
-#define PHOTON_CAP 1 << 16
-#define MAX_PHOTONS_PER_FRAME 20
+#define PHOTON_CAP 1 << 24
+#define MAX_PHOTONS_PER_FRAME BLOCK_SIZE * 32
 
 static float heats[SHELLS];
 static float _heats_squared[SHELLS];
@@ -78,10 +78,10 @@ void update(void)
     int remaining_photons_in_frame = MAX_PHOTONS_PER_FRAME;
 
     while (remaining_photons > 0 && remaining_photons_in_frame > 0) {
-        --remaining_photons;
-        --remaining_photons_in_frame;
+        remaining_photons-=BLOCK_SIZE*2;
+        remaining_photons_in_frame-=BLOCK_SIZE*2;
 
-        photon(heats, _heats_squared);
+        photon_vectorized(heats, _heats_squared, BLOCK_SIZE*2);
     }
 
     glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, sizeof(heats), heats);
@@ -89,7 +89,7 @@ void update(void)
 
 int main(void)
 {
-    seed((uint64_t) SEED);
+    seed_vector((uint64_t) SEED);
     glfwInit();
 
     glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);

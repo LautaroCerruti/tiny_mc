@@ -9,85 +9,76 @@ def limpiar():
     print("Limpiando archivos generados previamente...")
     subprocess.run("rm -f headless head *.o", shell=True)
 
-def compile_executable(compiler, additional_flags, usar_lto, usar_native, macro):
+
+def compile_executable(compiler, base_flags, opt_flags, macro):
     """
     Compila el ejecutable 'headless' usando los parámetros pasados.
+    base_flags: flags base (e.g., -march=native -flto ...)
+    opt_flags: flags de optimización (e.g., -O2)
+    macro: valor para -DPHOTONS
     """
-    # Limpiar archivos previos antes de compilar
     limpiar()
 
     default_flags = "-std=c11 -Wall -Wextra"
-    flags = default_flags
-    if additional_flags:
-        flags += " " + additional_flags
-    if usar_lto and '-flto' not in flags:
-        flags += " -flto"
-    if usar_native and '-march=native' not in flags:
-        flags += " -march=native"
+    flags = f"{default_flags} {base_flags}"
+    if opt_flags:
+        flags += f" {opt_flags}"
     if macro is not None:
         flags += f" -DPHOTONS={macro}"
 
     print(f"\nCompilando con:\n  Compilador: {compiler}\n  Flags: {flags}")
 
-    # Lista de archivos fuente a compilar
     fuentes = ['tiny_mc.c', 'wtime.c', 'photon.c', 'xoshiro.c']
     objetos = []
     for fuente in fuentes:
         objeto = os.path.splitext(fuente)[0] + '.o'
         print(f"Compilando {fuente} -> {objeto}...")
-        cmd_compilacion = f"{compiler} {flags} -c {fuente} -o {objeto}"
-        resultado = subprocess.run(cmd_compilacion, shell=True)
-        if resultado.returncode != 0:
+        cmd = f"{compiler} {flags} -c {fuente} -o {objeto}"
+        res = subprocess.run(cmd, shell=True)
+        if res.returncode != 0:
             print(f"Error compilando {fuente}.")
             return False
         objetos.append(objeto)
     
-    # Opciones de enlace (en este ejemplo, -lm)
     ldflags = "-lm"
-    objetos_enlazar = " ".join(objetos)
+    objs = " ".join(objetos)
     ejecutable = "headless"
-    cmd_enlace = f"{compiler} {flags} -o {ejecutable} {objetos_enlazar} {ldflags}"
+    cmd_link = f"{compiler} {flags} -o {ejecutable} {objs} {ldflags}"
     print("Enlazando objetos para generar el ejecutable headless...")
-    resultado = subprocess.run(cmd_enlace, shell=True)
-    if resultado.returncode != 0:
+    res = subprocess.run(cmd_link, shell=True)
+    if res.returncode != 0:
         print("Error durante el enlace.")
         return False
     print(f"Compilación exitosa. Ejecutable generado: {ejecutable}")
     return True
 
+
 def guardar_ejecucion(nombre_ejecucion):
-    """
-    Guarda en el archivo 'registro_flags.csv' el nombre de la ejecución.
-    Se usa una única columna llamada 'compilador_flag'.
-    """
     registro_csv = "./results/registro_flags.csv"
     file_exists = os.path.exists(registro_csv)
-    with open(registro_csv, "a", newline="") as csvfile:
-        fieldnames = ["compilador_flag"]
-        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+    with open(registro_csv, "a", newline='') as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=["compilador_flag"])
         if not file_exists:
             writer.writeheader()
         writer.writerow({"compilador_flag": nombre_ejecucion})
 
+
 def ejecutar_headless(runs, nombre_ejecucion):
-    """
-    Ejecuta el ejecutable 'headless' la cantidad de veces indicada.
-    Antes de cada ejecución se guarda en el CSV el nombre de la ejecución.
-    """
     for i in range(runs):
         print(f"Ejecución {i+1} de {runs}...")
         guardar_ejecucion(nombre_ejecucion)
-        cmd = "./headless -q -o ./results/photon_size_atom_opt.csv"
-        resultado = subprocess.run(cmd, shell=True)
-        if resultado.returncode != 0:
+        cmd = "./headless -q -o ./results/notebook_optimize_flags.csv"
+        res = subprocess.run(cmd, shell=True)
+        if res.returncode != 0:
             print("Error al ejecutar headless.")
             break
 
-def main():
-    compilacion_csv = './opciones_compilacion_photon_size_opt.csv'
-    runs_csv = './runs_photon_size.csv'
 
-    # Cargar el archivo runs.csv en una lista
+def main():
+    compilacion_csv = './opciones_compilacion_optimize.csv'
+    runs_csv = './runs_optimize.csv'
+
+    # Leer runs
     runs_list = []
     try:
         with open(runs_csv, newline='') as f:
@@ -104,33 +95,30 @@ def main():
         print(f"El archivo {runs_csv} no se encontró.")
         return
 
-    # Para cada fila del CSV de opciones de compilación, se recorre cada fila de runs
+    # Leer opciones de compilación
     try:
         with open(compilacion_csv, newline='') as f:
             lector = csv.DictReader(f)
             for fila in lector:
                 compiler = fila['compiler'].strip()
-                additional_flags = fila['flags'].strip()
-                usar_lto = fila['lto'].strip().lower() in ['true', '1', 'yes']
-                usar_native = fila['native'].strip().lower() in ['true', '1', 'yes']
+                base_flags = fila['base_flags'].strip()
+                opt_flags = fila['flags'].strip()
                 print("\n======================================")
-                print(f"Opciones de compilación: Compiler={compiler}, Flags adicionales='{additional_flags}', LTO={usar_lto}, Native={usar_native}")
+                print(f"Opciones de compilación: Compiler={compiler}, BaseFlags='{base_flags}', Flags='{opt_flags}'")
                 print("======================================")
                 
                 for run in runs_list:
                     photons_macro = run["photons"]
                     runs_count = run["runs"]
                     print(f"\n--- Compilando para -Dphotons={photons_macro} y ejecutando {runs_count} veces ---")
-                    if not compile_executable(compiler, additional_flags, usar_lto, usar_native, photons_macro):
+                    if not compile_executable(compiler, base_flags, opt_flags, photons_macro):
                         print("La compilación falló para esta configuración. Se omite la ejecución.")
                         continue
-                    # Eliminar '-' y espacios de additional_flags
-                    clean_flags = additional_flags.replace("-", "").replace(" ", "")
-                    nombre_ejecucion = f"{compiler}_{clean_flags}"
-                    if usar_lto:
-                        nombre_ejecucion += "_lto"
-                    if usar_native:
-                        nombre_ejecucion += "_native"
+                    clean_base = base_flags.replace('-', '').replace(' ', '')
+                    clean_opt = opt_flags.replace('-', '').replace(' ', '')
+                    nombre_ejecucion = f"{compiler}_"
+                    if clean_opt:
+                        nombre_ejecucion += f"{clean_opt}"
                     ejecutar_headless(runs_count, nombre_ejecucion)
     except FileNotFoundError:
         print(f"El archivo {compilacion_csv} no se encontró.")
