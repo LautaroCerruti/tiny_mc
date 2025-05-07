@@ -19,7 +19,7 @@ def compile_executable(compiler, base_flags, opt_flags, macro):
     """
     limpiar()
 
-    default_flags = "-std=c11 -Wall -Wextra -g"
+    default_flags = "-std=c11 -Wall -Wextra"
     flags = f"{default_flags} {base_flags}"
     if opt_flags:
         flags += f" {opt_flags}"

@@ -31,5 +31,5 @@
 #endif
 
 #ifndef MAGIC_N
-#define MAGIC_N 10
+#define MAGIC_N 8
 #endif
