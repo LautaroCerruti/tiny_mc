@@ -66,7 +66,7 @@ void photon_vectorized(float *__restrict__ heats, float *__restrict__ heats_squa
         }
 
         if (hasToSim == BLOCK_SIZE) {
-            // gcc se vectoriza el siguiente for 16 byte
+            // gcc ???????????????'
             // ICX se vectoriza el siguiente for
             for (unsigned int i = 0; i < BLOCK_SIZE; i++) {
                 shell_update[update_count+i] = shell[i];
