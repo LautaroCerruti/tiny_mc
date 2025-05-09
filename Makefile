@@ -8,14 +8,14 @@ EXTRAFLAGS =
 #Extra flags gcc
 #EXTRAFLAGS = -fopt-info-vec-optimized -fopt-info-vec-missed
 #Extra flags icx
-#EXTRAFLAGS = -qopt-report-phase=vec -qopt-report=5
+EXTRAFLAGS = -qopt-report-phase=vec -qopt-report=3
 #Extra flags clang
 #EXTRAFLAGS = -Rpass=loop-vectorize -Rpass-missed=loop-vectorize -Rpass-analysis=loop-vectorize -fsave-optimization-record
 
 # Flags gcc
-#CFLAGS = -std=c11 -Wall -Wextra -Ofast -ffast-math -fdisable-tree-cunrolli -ftree-vectorize -march=native -flto 
+#CFLAGS = -std=c11 -Wall -Wextra -Ofast -ffast-math -fopenmp -fdisable-tree-cunrolli -ftree-vectorize -march=native -flto 
 # Flags icx
-CFLAGS = -std=c11 -Wall -Wextra -O3 -ffast-math -vec -xHost -ipo -fno-unroll-loops
+CFLAGS = -std=c11 -Wall -Wextra -O3 -ffast-math -vec -xHost -ipo -fno-unroll-loops -qopenmp -qopt-report-phase=vec -qopt-report=3
 # Flags clang
 #CFLAGS = -std=c11 -Wall -Wextra -Ofast -ffast-math -fvectorize -march=native -flto -Rpass=loop-vectorize -Rpass-missed=loop-vectorize -Rpass-analysis=loop-vectorize -fsave-optimization-record
 
