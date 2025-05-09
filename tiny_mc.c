@@ -57,8 +57,7 @@ int write_stat_file(const char *filename, double elapsed) {
 int main(int argc, char *argv[])
 {
     int  nthreads = omp_get_max_threads();
-    //seed_vector((uint64_t) SEED);
-    
+    seed_vector_omp((uint64_t) SEED, nthreads);
     // print_state_parallel(nthreads);
     // Variables para la línea de comandos
     const char *output_filename = "resultados.csv";
@@ -93,10 +92,11 @@ int main(int argc, char *argv[])
     double start = wtime();
     #pragma omp parallel reduction(+: heat[0:SHELLS], heat2[0:SHELLS])
     {
-        seed_vector_omp((uint64_t) SEED);
+        //seed_vector_omp2((uint64_t) SEED);
         photon_vectorized(heat, heat2, photons_per_thread);
     } 
     double end = wtime();
+
     assert(start <= end);
     double elapsed = end - start;
  

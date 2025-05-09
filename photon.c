@@ -32,10 +32,13 @@ void photon_vectorized(float *__restrict__ heats, float *__restrict__ heats_squa
     const float albedo = MU_S / (MU_S + MU_A);
     const float shells_per_mfp = 1e4f / MICRONS_PER_SHELL / (MU_A + MU_S);
 
+    int tid = omp_get_thread_num();
+
     unsigned int hasToSim = BLOCK_SIZE;
     while (hasToSim > 0) {
         float rands[BLOCK_SIZE*4] __attribute__((aligned(64)));
-        next_float_vector_4_times_block(rands);
+        //next_float_vector_4_times_block(rands);
+        next_float_vector_4_times_block_omp(rands, tid);
         float r[BLOCK_SIZE] __attribute__((aligned(64)));
         float h[BLOCK_SIZE] __attribute__((aligned(32)));
         unsigned short shell[BLOCK_SIZE] __attribute__((aligned(32)));
