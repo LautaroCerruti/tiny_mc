@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
 {
     int  nthreads = omp_get_max_threads();
     //seed_vector((uint64_t) SEED);
-    seed_vector_omp((uint64_t) SEED, nthreads);
+    
     // print_state_parallel(nthreads);
     // Variables para la línea de comandos
     const char *output_filename = "resultados.csv";
@@ -89,62 +89,14 @@ int main(int argc, char *argv[])
     }
     unsigned int photons_per_thread = PHOTONS / nthreads;
 
-    // VERSION 1
-    // double start = wtime();
-    // // photon_vectorized(heat, heat2, PHOTONS);
-    // #pragma omp parallel
-    // {
-    //     // Arrays locales por hilo, para acumular la simulación parcial
-    //     float local_heat [SHELLS] = {0.0f};
-    //     float local_heat2[SHELLS] = {0.0f};
-
-    //     // Simula la parte que toca a este hilo
-    //     photon_vectorized(local_heat, local_heat2, photons_per_thread);
-
-    //     for (int i = 0; i < SHELLS; ++i) {
-    //         #pragma omp atomic
-    //         heat[i]  += local_heat[i];
-    //         #pragma omp atomic
-    //         heat2[i] += local_heat2[i];
-    //     }
-    // }
-    // double end = wtime();
-
     // VERSION 2
     double start = wtime();
     #pragma omp parallel reduction(+: heat[0:SHELLS], heat2[0:SHELLS])
     {
+        seed_vector_omp((uint64_t) SEED);
         photon_vectorized(heat, heat2, photons_per_thread);
     } 
     double end = wtime();
-
-    // VERSION 3
-    // int nt = omp_get_max_threads();
-    // float (*partial1)[SHELLS] = malloc(nt * sizeof *partial1);
-    // float (*partial2)[SHELLS] = malloc(nt * sizeof *partial2);
-
-    // double start = wtime();
-    // #pragma omp parallel
-    // {
-    //     int tid = omp_get_thread_num();
-    //     memset(partial1[tid], 0, SHELLS * sizeof(float));
-    //     memset(partial2[tid], 0, SHELLS * sizeof(float));
-
-    //     photon_vectorized(partial1[tid], partial2[tid], photons_per_thread);
-
-    //     //printf("# Thread %d: %f %f\n", tid, partial1[tid][0], partial2[tid][0]);
-    // }
-    // double end = wtime();
-    // for (int t = 0; t < nt; ++t)
-    // for (int i = 0; i < SHELLS; ++i) {
-    //     heat[i]  += partial1[t][i];
-    //     heat2[i] += partial2[t][i];
-    // }
-    // //printf("# heat %f %f\n", heat[0], heat2[0]);
-    // free(partial1);
-    // free(partial2);
-
-
     assert(start <= end);
     double elapsed = end - start;
  
