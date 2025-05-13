@@ -33,3 +33,7 @@
 #ifndef MAGIC_N
 #define MAGIC_N 8
 #endif
+
+#ifndef MAX_THREADS
+#define MAX_THREADS 4
+#endif

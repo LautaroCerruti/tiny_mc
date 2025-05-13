@@ -37,8 +37,7 @@ void photon_vectorized(float *__restrict__ heats, float *__restrict__ heats_squa
     unsigned int hasToSim = BLOCK_SIZE;
     while (hasToSim > 0) {
         float rands[BLOCK_SIZE*4] __attribute__((aligned(64)));
-        //next_float_vector_4_times_block(rands);
-        next_float_vector_4_times_block_omp(rands, tid);
+        next_float_vector_4_times_block(rands, tid);
         float r[BLOCK_SIZE] __attribute__((aligned(64)));
         float h[BLOCK_SIZE] __attribute__((aligned(32)));
         unsigned short shell[BLOCK_SIZE] __attribute__((aligned(32)));
