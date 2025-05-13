@@ -37,3 +37,7 @@
 #ifndef MAX_THREADS
 #define MAX_THREADS 4
 #endif
+
+#ifndef PHOTONS_BLOCK
+#define PHOTONS_BLOCK (PHOTONS / (64*4))
+#endif

@@ -85,14 +85,24 @@ int main(int argc, char *argv[])
         printf("# Absorption = %8.3f/cm\n", MU_A);
         printf("# Photons    = %8d\n#\n", PHOTONS);
     }
-    unsigned int photons_per_thread = PHOTONS / nthreads;
+    //unsigned int photons_per_thread = PHOTONS / nthreads;
+
+    unsigned int total_blocks = PHOTONS / PHOTONS_BLOCK;
 
     double start = wtime();
     #pragma omp parallel reduction(+: heat[0:SHELLS], heat2[0:SHELLS])
-    {
-        photon_vectorized(heat, heat2, photons_per_thread);
-    } 
+    #pragma omp for schedule(dynamic,1)
+    for (unsigned int b = 0; b < total_blocks; ++b) {
+        photon_vectorized(heat, heat2, PHOTONS_BLOCK);
+    }
     double end = wtime();
+
+    // double start = wtime();
+    // #pragma omp parallel reduction(+: heat[0:SHELLS], heat2[0:SHELLS])
+    // {
+    //     photon_vectorized(heat, heat2, photons_per_thread);
+    // } 
+    // double end = wtime();
 
     assert(start <= end);
     double elapsed = end - start;
