@@ -17,8 +17,6 @@ void photon_vectorized(float *__restrict__ heats, float *__restrict__ heats_squa
     float weight[BLOCK_SIZE] __attribute__((aligned(32)));
     unsigned int simPerTrack[BLOCK_SIZE] __attribute__((aligned(32)));
 
-    // Se vectoriza el siguiente for 32 byte
-    // ICX vectoriza el siguiente for 32 byte
     for (int i = 0; i < BLOCK_SIZE; i++) {
         simPerTrack[i] = simulationCount/BLOCK_SIZE;
         w[i] = 1.0f;
@@ -41,8 +39,6 @@ void photon_vectorized(float *__restrict__ heats, float *__restrict__ heats_squa
         float r[BLOCK_SIZE] __attribute__((aligned(64)));
         float h[BLOCK_SIZE] __attribute__((aligned(32)));
         unsigned short shell[BLOCK_SIZE] __attribute__((aligned(32)));
-        // Se vectoriza el siguiente for 32 byte
-        // ICX Se vectoriza el siguiente for 32 byte
         for (int i = 0; i < BLOCK_SIZE; i++) {
             float t = -logf(rands[i]);
             x[i] += t * u[i];
@@ -51,16 +47,12 @@ void photon_vectorized(float *__restrict__ heats, float *__restrict__ heats_squa
             r[i] = sqrtf(x[i]*x[i] + y[i]*y[i] + z[i]*z[i]);
             h[i] = (1.0f - albedo) * weight[i];
         }
-        // Se vectoriza el siguiente for 16 byte
-        // ICX se vectoriza el siguiente for
         for (int i = 0; i < BLOCK_SIZE; i++) {
             unsigned short s = (unsigned short)(r[i] * shells_per_mfp);
             shell[i] = (s >= SHELLS) ? SHELLS-1 : s;
         }
 
         if(update_count+hasToSim > MAGIC_N) {
-            // no se vectoriza el siguiente for
-            // ICX no se vectoriza el siguiente for
             for (unsigned int j = 0; j < update_count; j++) {
                 heats[shell_update[j]] += heat_update[j];
                 heats_squared[shell_update[j]] += heat_update[j]*heat_update[j];
@@ -69,16 +61,12 @@ void photon_vectorized(float *__restrict__ heats, float *__restrict__ heats_squa
         }
 
         if (hasToSim == BLOCK_SIZE) {
-            // gcc ???????????????'
-            // ICX se vectoriza el siguiente for
             for (int i = 0; i < BLOCK_SIZE; i++) {
                 shell_update[update_count+i] = shell[i];
                 heat_update[update_count+i] = h[i];
             }
             update_count+=BLOCK_SIZE;
         } else {
-            // gcc no se vectoriza el siguiente for
-            // ICX no se vectoriza el siguiente for
             for (int i = 0; i < BLOCK_SIZE; i++) {
                 if (simPerTrack[i]) {
                     shell_update[update_count] = shell[i];
@@ -89,8 +77,6 @@ void photon_vectorized(float *__restrict__ heats, float *__restrict__ heats_squa
         }
 
         hasToSim = 0;
-        // Se vectoriza el siguiente for 32 byte
-        // ICX se vecotoriza el siguiente for
         for (int i = 0; i < BLOCK_SIZE; i++) {
             float t_val = rands[i+BLOCK_SIZE*2];
             float r = sqrtf(t_val);
@@ -120,16 +106,12 @@ void photon_vectorized(float *__restrict__ heats, float *__restrict__ heats_squa
                 }
             }
         }
-        // se vectoriza el siguiente for 16 byte
-        // ICX se vectoriza el siguiente for
         for (int i = 0; i < BLOCK_SIZE; i++) {
             if(simPerTrack[i])
                 hasToSim++;
         }
     }
 
-    // no se vectoriza el siguiente for
-    // ICX no se vectoriza el siguiente for
     for (unsigned int j = 0; j < update_count; j++) {
         heats[shell_update[j]] += heat_update[j];
         heats_squared[shell_update[j]] += heat_update[j]*heat_update[j];
