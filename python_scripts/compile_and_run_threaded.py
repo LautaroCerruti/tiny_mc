@@ -1,6 +1,7 @@
 import csv
 import subprocess
 import os
+import time
 
 # === Configuración inicial ===
 compiler = "gcc"                            # Compilador a usar
@@ -78,6 +79,7 @@ def ejecutar_headless(nthreads, runs, photons):
         if subprocess.run(cmd, shell=True).returncode != 0:
             print("Error al ejecutar headless.")
             break
+        time.sleep(1)
 
 
 def main():

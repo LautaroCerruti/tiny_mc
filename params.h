@@ -39,5 +39,5 @@
 #endif
 
 #ifndef PHOTONS_BLOCK
-#define PHOTONS_BLOCK (PHOTONS / 256)
+#define PHOTONS_BLOCK (PHOTONS / 4096)
 #endif
