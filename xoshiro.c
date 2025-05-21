@@ -53,18 +53,15 @@ void next_vector(uint64_t *array, int n) {
 void next_float_vector_4_times_block(float *array1, int tid) {
     uint64_t temp[BLOCK_SIZE*2] __attribute__((aligned(64)));
     for (int b = 0; b < BLOCK_SIZE*2; b += BLOCK_SIZE) {
-        // Para cada lane se genera el entero aleatorio.
         for (int i = 0; i < BLOCK_SIZE; i++) {
             temp[i] = s[tid][0][i] + s[tid][3][i];
         }
         
-        // Se prepara el valor temporal t para la actualización del estado.
         uint64_t t[BLOCK_SIZE];
         for (int i = 0; i < BLOCK_SIZE; i++) {
             t[i] = s[tid][1][i] << 17;
         }
         
-        // Actualización del estado para cada lane.
         for (int i = 0; i < BLOCK_SIZE; i++) {
             s[tid][2][i] ^= s[tid][0][i];
         }
@@ -84,9 +81,6 @@ void next_float_vector_4_times_block(float *array1, int tid) {
             s[tid][3][i] = rotl(s[tid][3][i], 45);
         }
         
-        // Conversión del entero de 64 bits en dos floats:
-        // - Para el primer float: se usan los 24 bits superiores.
-        // - Para el segundo float: se usan los 24 bits intermedios (desplazados 16 y luego enmascarados).
         const float scale = 1.0f / (1U << 24);
 		for (int i = 0; i < BLOCK_SIZE; i++) {
             array1[b + i] = (temp[i] >> 40) * scale;

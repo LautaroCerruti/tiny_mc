@@ -52,14 +52,6 @@ void photon_vectorized(float *__restrict__ heats, float *__restrict__ heats_squa
             shell[i] = (s >= SHELLS) ? SHELLS-1 : s;
         }
 
-        if(update_count+hasToSim > MAGIC_N) {
-            for (unsigned int j = 0; j < update_count; j++) {
-                heats[shell_update[j]] += heat_update[j];
-                heats_squared[shell_update[j]] += heat_update[j]*heat_update[j];
-            }
-            update_count = 0;
-        }
-
         if (hasToSim == BLOCK_SIZE) {
             for (int i = 0; i < BLOCK_SIZE; i++) {
                 shell_update[update_count+i] = shell[i];
@@ -93,12 +85,12 @@ void photon_vectorized(float *__restrict__ heats, float *__restrict__ heats_squa
             if (weight[i] < 0.001f) {
                 if (rands[i+BLOCK_SIZE] > 0.1f) {
                     if (simPerTrack[i]>0) simPerTrack[i]--;
-                    x[i] = simPerTrack[i] ? 0.0f : x[i];
-                    y[i] = simPerTrack[i] ? 0.0f : y[i];
-                    z[i] = simPerTrack[i] ? 0.0f : z[i];
-                    u[i] = simPerTrack[i] ? 0.0f : u[i];
-                    v[i] = simPerTrack[i] ? 0.0f : v[i];
-                    w[i] = simPerTrack[i] ? 1.0f : w[i];
+                    x[i] = 0.0f;
+                    y[i] = 0.0f;
+                    z[i] = 0.0f;
+                    u[i] = 0.0f;
+                    v[i] = 0.0f;
+                    w[i] = 1.0f;
                     weight[i] = simPerTrack[i] ? 1.0f : weight[i];
 
                 } else {
@@ -109,6 +101,14 @@ void photon_vectorized(float *__restrict__ heats, float *__restrict__ heats_squa
         for (int i = 0; i < BLOCK_SIZE; i++) {
             if(simPerTrack[i])
                 hasToSim++;
+        }
+
+        if(update_count+hasToSim > MAGIC_N) {
+            for (unsigned int j = 0; j < update_count; j++) {
+                heats[shell_update[j]] += heat_update[j];
+                heats_squared[shell_update[j]] += heat_update[j]*heat_update[j];
+            }
+            update_count = 0;
         }
     }
 
