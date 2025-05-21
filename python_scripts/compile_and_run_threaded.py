@@ -4,18 +4,18 @@ import os
 import time
 
 # === Configuración inicial ===
-compiler = "gcc"                            # Compilador a usar
-global_compile_flags = "-std=c11 -Wall -Wextra -O2 -ffast-math -fopenmp -fdisable-tree-cunrolli -ftree-vectorize -march=native -flto"  # Flags de compilación fijas
+compiler = "icx"                            # Compilador a usar
+global_compile_flags = "-std=c11 -Wall -Wextra -O3 -ffast-math -vec -xHost -ipo -fno-unroll-loops -qopenmp"  # Flags de compilación fijas
 sources = ["tiny_mc.c", "wtime.c", "photon.c", "xoshiro.c"]
 executable = "headless"                     # Nombre del ejecutable
 dirs = {"results": "results"}
 
 # Nombre del CSV de ejecuciones (nthreads, photons, runs)
-runs_csv = "runs_threading_atom.csv"
+runs_csv = "runs_threading.csv"
 # Registro de ejecuciones realizadas
 environment_log = os.path.join(dirs["results"], "registro_cores.csv")
 # Archivo de salida generado por el ejecutable
-output_csv = os.path.join(dirs["results"], "atom_cores.csv")
+output_csv = os.path.join(dirs["results"], "notebook_cores.csv")
 
 
 def limpiar():
@@ -75,7 +75,7 @@ def ejecutar_headless(nthreads, runs, photons):
     for i in range(1, runs+1):
         print(f"Ejecución {i}/{runs} — threads={nthreads}, photons={photons}")
         guardar_ejecucion(nthreads)
-        cmd = f"OMP_NUM_THREADS={nthreads} ./{executable} -q -o {output_csv}"
+        cmd = f"OMP_NUM_THREADS={nthreads} ./{executable} -o {output_csv}"
         if subprocess.run(cmd, shell=True).returncode != 0:
             print("Error al ejecutar headless.")
             break
