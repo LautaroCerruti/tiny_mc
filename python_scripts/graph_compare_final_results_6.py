@@ -5,11 +5,15 @@ import numpy as np
 # Definir la lista de archivos y sus etiquetas
 files = [
     {"path": "./results/lab1/photon_size_atom_xoshiro_opt.csv", "label": "Atom Lab1"},
-    {"path": "./results/lab2/atom_best_flag.csv", "label": "Atom Vectorized"},
-    {"path": "./results/lab2/atom_pgo_gcc.csv", "label": "Atom Vectorized + PGO"},
+    {"path": "./results/lab2/atom_pgo_gcc.csv", "label": "Atom Vectorized Lab2"},
+    {"path": "./results/lab2/atom_best_flag_v2.csv", "label": "Atom Vectorized New"},
+    {"path": "./results/lab2/atom_pgo_gcc_v2.csv", "label": "Atom Vectorized New + PGO"},
+
     {"path": "./results/lab1/photon_size_notebook_xoshiro_opt.csv", "label": "Local Lab1"},
-    {"path": "./results/lab2/notebook_best_flag.csv", "label": "Local Vectorized"},
-    {"path": "./results/lab2/notebook_pgo_icx.csv", "label": "Local Vectorized + PGO"}
+    {"path": "./results/lab2/notebook_best_flag.csv", "label": "Local Vectorized Lab2"},
+    {"path": "./results/lab2/notebook_best_flag_v2.csv", "label": "Local Vectorized New"},
+    {"path": "./results/lab2/notebook_pgo_icx_v2.csv", "label": "Local Vectorized New + PGO"},
+
 ]
 
 max_pus_values = []

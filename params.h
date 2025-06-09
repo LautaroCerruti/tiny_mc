@@ -31,5 +31,13 @@
 #endif
 
 #ifndef MAGIC_N
-#define MAGIC_N 8
+#define MAGIC_N 16
+#endif
+
+#ifndef MAX_THREADS
+#define MAX_THREADS 4
+#endif
+
+#ifndef PHOTONS_BLOCK
+#define PHOTONS_BLOCK (PHOTONS / 4096)
 #endif

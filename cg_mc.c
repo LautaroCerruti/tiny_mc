@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <stdio.h>
+#include <omp.h>
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -78,10 +79,13 @@ void update(void)
     int remaining_photons_in_frame = MAX_PHOTONS_PER_FRAME;
 
     while (remaining_photons > 0 && remaining_photons_in_frame > 0) {
-        remaining_photons-=BLOCK_SIZE*2;
-        remaining_photons_in_frame-=BLOCK_SIZE*2;
+        remaining_photons-=64;
+        remaining_photons_in_frame-=64;
 
-        photon_vectorized(heats, _heats_squared, BLOCK_SIZE*2);
+        #pragma omp parallel for schedule(dynamic,1) reduction(+: heats[0:SHELLS], _heats_squared[0:SHELLS])
+        for (unsigned int b = 0; b < 4; ++b) {
+            photon_vectorized(heats, _heats_squared, 16);
+        }
     }
 
     glBufferSubData(GL_SHADER_STORAGE_BUFFER, 0, sizeof(heats), heats);
@@ -89,7 +93,7 @@ void update(void)
 
 int main(void)
 {
-    seed_vector((uint64_t) SEED);
+    seed_vector((uint64_t) SEED, omp_get_max_threads());
     glfwInit();
 
     glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
