@@ -1,12 +1,14 @@
 #include <cuda_runtime.h>
 #include <curand_kernel.h>
 #include <math_constants.h>
+#include <math.h>
 #include "params.h"
 
-// CUDA kernel: one thread simulates one photon
+// CUDA kernel: each thread simulates `photons_per_thread` photons
 __global__ void photon_kernel(float* heats, float* heats_squared, unsigned int photons_per_thread) {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
-    if (idx >= PHOTONS/photons_per_thread) return;
+    int total_threads = (PHOTONS + photons_per_thread - 1) / photons_per_thread;
+    if (idx >= total_threads) return;
 
     // Initialize per-thread RNG
     curandState state;
@@ -51,15 +53,15 @@ __global__ void photon_kernel(float* heats, float* heats_squared, unsigned int p
                 // Photon is absorbed
                 remaining_photons--;
                 x = 0.0f;
-                y = 0.0f; 
+                y = 0.0f;
                 z = 0.0f;
                 u = 0.0f;
                 v = 0.0f;
                 w = 1.0f;
-                weight = 1.0f; // Reset weight for next photon
-                continue; // Skip to next photon
+                weight = 1.0f;
+                continue;
             } else {
-                weight *= 10f;
+                weight *= 10.0f;
             }
         }
 
@@ -88,11 +90,12 @@ void launch_simulation(float *h_heats, float *h_heats_sq) {
     cudaMemset(d_heats_sq, 0, SHELLS * sizeof(float));
 
     // Choose launch parameters
+    int photons_per_thread = 2048;
     int threads = 256;
-    int blocks = (PHOTONS + threads - 1) / threads;
+    int blocks = ((PHOTONS + photons_per_thread - 1) / photons_per_thread + threads - 1) / threads;
 
     // Launch kernel with a time- or user-defined seed
-    photon_kernel<<<blocks, threads>>>(d_heats, d_heats_sq, 12345ULL);
+    photon_kernel<<<blocks, threads>>>(d_heats, d_heats_sq, photons_per_thread);
     cudaDeviceSynchronize();
 
     // Copy results back to host...
