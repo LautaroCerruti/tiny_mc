@@ -1,11 +1,13 @@
+#include "photon_cuda.h"
 #include <cuda_runtime.h>
 #include <curand_kernel.h>
 #include <math_constants.h>
 #include <math.h>
 #include "params.h"
+#include "helper_cuda.h"
 
 // CUDA kernel: each thread simulates `photons_per_thread` photons
-__global__ void photon_kernel(float* heats, float* heats_squared, unsigned int photons_per_thread) {
+__global__ void photon_kernel_v1(float* heats, float* heats_squared, unsigned int photons_per_thread) {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
     int total_threads = (PHOTONS + photons_per_thread - 1) / photons_per_thread;
     if (idx >= total_threads) return;
@@ -81,29 +83,36 @@ __global__ void photon_kernel(float* heats, float* heats_squared, unsigned int p
     }
 }
 
-void launch_simulation(float *h_heats, float *h_heats_sq) {
-    // Allocate and zero device arrays
+void launch_simulation(float *h_heats, float *h_heats_sq, double *elapsed_time) {
     float *d_heats, *d_heats_sq;
-    cudaMalloc(&d_heats,  SHELLS * sizeof(float));
-    cudaMalloc(&d_heats_sq, SHELLS * sizeof(float));
-    cudaMemset(d_heats,  0, SHELLS * sizeof(float));
-    cudaMemset(d_heats_sq, 0, SHELLS * sizeof(float));
+    checkCudaCall(cudaMalloc(&d_heats,  SHELLS * sizeof(float)));
+    checkCudaCall(cudaMalloc(&d_heats_sq, SHELLS * sizeof(float)));
+    checkCudaCall(cudaMemset(d_heats,  0, SHELLS * sizeof(float)));
+    checkCudaCall(cudaMemset(d_heats_sq, 0, SHELLS * sizeof(float)));
 
-    // Choose launch parameters
-    int photons_per_thread = 2048;
-    int threads = 256;
-    int blocks = ((PHOTONS + photons_per_thread - 1) / photons_per_thread + threads - 1) / threads;
+    cudaEvent_t start, stop;
+    checkCudaCall(cudaEventCreate(&start));
+    checkCudaCall(cudaEventCreate(&stop));
 
-    // Launch kernel with a time- or user-defined seed
-    photon_kernel<<<blocks, threads>>>(d_heats, d_heats_sq, photons_per_thread);
-    cudaDeviceSynchronize();
+    int blocks = (PHOTONS / GPU_PHOTONS_PER_THREAD) / GPU_THREADS;
 
-    // Copy results back to host...
-    // float h_heats[SHELLS], h_heats_sq[SHELLS];
-    // cudaMemcpy(h_heats,    d_heats,    SHELLS * sizeof(float), cudaMemcpyDeviceToHost);
-    // cudaMemcpy(h_heats_sq, d_heats_sq, SHELLS * sizeof(float), cudaMemcpyDeviceToHost);
+    checkCudaCall(cudaEventRecord(start, 0));
 
-    // Cleanup
-    cudaFree(d_heats);
-    cudaFree(d_heats_sq);
+    photon_kernel_v1<<<blocks, GPU_THREADS>>>(d_heats, d_heats_sq, GPU_PHOTONS_PER_THREAD);
+
+    checkCudaCall(cudaEventRecord(stop, 0));
+    checkCudaCall(cudaEventSynchronize(stop));
+
+    float ms = 0.0f;
+    checkCudaCall(cudaEventElapsedTime(&ms, start, stop));
+
+    *elapsed_time = ms / 1000.0;
+
+    checkCudaCall(cudaMemcpy(h_heats, d_heats, SHELLS * sizeof(float), cudaMemcpyDeviceToHost));
+    checkCudaCall(cudaMemcpy(h_heats_sq, d_heats_sq, SHELLS * sizeof(float), cudaMemcpyDeviceToHost));
+
+    checkCudaCall(cudaEventDestroy(start));
+    checkCudaCall(cudaEventDestroy(stop));
+    checkCudaCall(cudaFree(d_heats));
+    checkCudaCall(cudaFree(d_heats_sq));
 }

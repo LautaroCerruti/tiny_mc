@@ -35,9 +35,17 @@
 #endif
 
 #ifndef MAX_THREADS
-#define MAX_THREADS 4
+#define MAX_THREADS 12
 #endif
 
 #ifndef PHOTONS_BLOCK
 #define PHOTONS_BLOCK (PHOTONS / 4096)
+#endif
+
+#ifndef GPU_THREADS
+#define GPU_THREADS 1024 // MAX VALUE 1024
+#endif
+
+#ifndef GPU_PHOTONS_PER_THREAD
+#define GPU_PHOTONS_PER_THREAD 8096
 #endif
