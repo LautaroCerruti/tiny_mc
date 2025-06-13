@@ -36,12 +36,12 @@ int write_stat_file(const char *filename, double elapsed) {
             fprintf(stderr, "Error opening file %s\n", filename);
             return 1;
         }
-        fprintf(csvFile, "photons,time,pus\n");
+        fprintf(csvFile, "photons,blocks,threads,photones_per_thread,time,pus\n");
     } else {
         fclose(csvFile);
         csvFile = fopen(filename, "a");
     }
-    fprintf(csvFile, "%i, %lf, %lf\n", PHOTONS, elapsed, PHOTONS / (elapsed * 1e6));
+    fprintf(csvFile, "%ld, %d, %d, %ld, %lf, %lf\n", PHOTONS, GPU_BLOCKS, GPU_THREADS, PHOTONS / (GPU_BLOCKS * GPU_THREADS), elapsed, PHOTONS / (elapsed * 1e6));
     fclose(csvFile);
     return 0;
 }
@@ -52,7 +52,7 @@ int write_stat_file(const char *filename, double elapsed) {
 int main(int argc, char *argv[])
 {
     // Variables para la línea de comandos
-    const char *output_filename = "resultados.csv";
+    const char *output_filename = "resultados_gpu.csv";
     int verbose = 1;  // 2: imprimir todo, 1: imprimir result tiempo, 0: modo quiet
 
     int opt;
@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
         printf("# %s\n# %s\n# %s\n", t1, t2, t3);
         printf("# Scattering = %8.3f/cm\n", MU_S);
         printf("# Absorption = %8.3f/cm\n", MU_A);
-        printf("# Photons    = %8d\n#\n", PHOTONS);
+        printf("# Photons    = %8ld\n#\n", PHOTONS);
     }
 
     double elapsed = 0.0;

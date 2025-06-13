@@ -7,7 +7,7 @@
 #endif
 
 #ifndef PHOTONS
-#define PHOTONS 16777216 // number of photons
+#define PHOTONS (1L<<32) // number of photons
 #endif
 
 #ifndef MU_A
@@ -42,10 +42,10 @@
 #define PHOTONS_BLOCK (PHOTONS / 4096)
 #endif
 
-#ifndef GPU_THREADS
-#define GPU_THREADS 1024 // MAX VALUE 1024
+#ifndef GPU_BLOCKS
+#define GPU_BLOCKS 256
 #endif
 
-#ifndef GPU_PHOTONS_PER_THREAD
-#define GPU_PHOTONS_PER_THREAD 8096
+#ifndef GPU_THREADS
+#define GPU_THREADS 256
 #endif
