@@ -4,3 +4,5 @@ gcc -std=c11 -Wall -Wextra -g -O2 -ffast-math -flto -march=native -ftree-vectori
 icx -std=c11 -Wall -Wextra -g -O2 -ffast-math -ipo -xHost -vec -fno-unroll-loops -g -o prueba xoshiro.o prueba.c -lgomp -lm
 
 -fopt-info-vec-optimized -fopt-info-vec-missed
+
+nvcc -std=c++11 -arch=sm_60 -O3 -I/usr/local/cuda/include tiny_mc_cuda.cu photon_cuda.cu -o photon_cuda -L/usr/local/cuda/lib64 -lcudart -lcurand -lm
