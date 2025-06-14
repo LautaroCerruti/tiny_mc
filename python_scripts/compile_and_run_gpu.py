@@ -12,9 +12,9 @@ link_flags     = "-L/usr/local/cuda/lib64 -lcudart -lcurand -lm"
 dirs           = {"results": "results"}
 
 # CSV con formato: blocks,threads,photons,runs
-runs_csv   = "runs_gpu.csv"
+runs_csv   = "runs_gpu_best_config_1060.csv"
 # Archivo de salida generado por el ejecutable
-output_csv = os.path.join(dirs["results"], "gtx1060_matrix.csv")
+output_csv = os.path.join(dirs["results"], "gtx1060_by_size.csv")
 
 
 def limpiar():
