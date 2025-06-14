@@ -43,9 +43,9 @@
 #endif
 
 #ifndef GPU_BLOCKS
-#define GPU_BLOCKS 256
+#define GPU_BLOCKS 128
 #endif
 
 #ifndef GPU_THREADS
-#define GPU_THREADS 256
+#define GPU_THREADS 128
 #endif

@@ -7,7 +7,7 @@
 #include "helper_cuda.h"
 #include <cstdint>
 
-__global__ void photon_kernel_v1(float* heats, float* heats_squared, unsigned int photons_per_thread) {
+__global__ void photon_kernel_atomic_global(float* heats, float* heats_squared, unsigned int photons_per_thread) {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
 
     // Initialize per-thread RNG
@@ -81,7 +81,7 @@ __global__ void photon_kernel_v1(float* heats, float* heats_squared, unsigned in
     }
 }
 
-__global__ void photon_kernel_v2(float* heats, float* heats_squared, unsigned int photons_per_thread) {
+__global__ void photon_kernel_shared(float* heats, float* heats_squared, unsigned int photons_per_thread) {
     int tid = threadIdx.x;
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -175,7 +175,7 @@ __global__ void photon_kernel_v2(float* heats, float* heats_squared, unsigned in
     }
 }
 
-__global__ void photon_kernel_v3(float* heats, float* heats_squared, unsigned int photons_per_thread) {
+__global__ void photon_kernel_polares(float* heats, float* heats_squared, unsigned int photons_per_thread) {
     int tid = threadIdx.x;
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -255,228 +255,6 @@ __global__ void photon_kernel_v3(float* heats, float* heats_squared, unsigned in
         xi2 = r * sin;
 
         u = 2.0f * s - 1.0f;
-        float factor = 2.0f * sqrtf(1.0f - s);
-        v = xi1 * factor;
-        w = xi2 * factor;
-    }
-
-    __syncthreads();
-
-    if (tid < SHELLS) {
-        atomicAdd(&heats[tid], s_heats[tid]);
-        atomicAdd(&heats_squared[tid], s_heats_sq[tid]);
-    }
-}
-
-__global__ void photon_kernel_v4(float* heats, float* heats_squared, unsigned int photons_per_thread) {
-    int tid = threadIdx.x;
-    int idx = blockIdx.x * blockDim.x + threadIdx.x;
-
-    // apuntadores en shared memory
-    __shared__ float s_heats[SHELLS];
-    __shared__ float s_heats_sq[SHELLS];
-
-    // Inicialización de shared (por los primeros SHELLS hilos)
-    if (tid < SHELLS) {
-        s_heats[tid]    = 0.0f;
-        s_heats_sq[tid] = 0.0f;
-    }
-    
-    __syncthreads();
-
-    // Initialize per-thread RNG
-    curandState state;
-    //curand_init(seed, idx, 0, &state);
-    curand_init(clock64(), idx, 0, &state);
-
-    // Precompute constants
-    const float albedo = MU_S / (MU_S + MU_A);
-    const float shells_per_mfp = 1e4f / MICRONS_PER_SHELL / (MU_A + MU_S);
-
-    // Photon state
-    float x = 0.0f, y = 0.0f, z = 0.0f;
-    float u = 0.0f, v = 0.0f, w = 1.0f;
-    float weight = 1.0f;
-
-    int prevShell = -1;
-    float cachedW = 0.0f, cachedWS = 0.0f;
-    unsigned int remaining_photons = photons_per_thread;
-    // Photon life loop
-    while (remaining_photons) {
-        // Sample step length
-        float rnd = curand_uniform(&state);
-        float t = -logf(rnd);
-        x += t * u;
-        y += t * v;
-        z += t * w;
-
-        // Determine shell
-        int shell = (int)(sqrtf(x*x + y*y + z*z) * shells_per_mfp);
-        if (shell >= SHELLS) shell = SHELLS - 1;
-
-        // Deposit energy
-        float deposit = (1.0f - albedo) * weight;
-        if (shell == prevShell) {
-            cachedW += deposit;
-            cachedWS += deposit * deposit;
-        } else {
-            if (prevShell >= 0) {
-                atomicAdd(&s_heats[prevShell], cachedW);
-                atomicAdd(&s_heats_sq[prevShell], cachedWS);
-            }
-            prevShell = shell;
-            cachedW = deposit;
-            cachedWS = deposit * deposit;
-        }
-
-        // Update weight
-        weight *= albedo;
-
-        // Roulette for low-weight photons
-        if (weight < 0.001f) {
-            if (curand_uniform(&state) > 0.1f) {
-                // Photon is absorbed
-                remaining_photons--;
-                x = 0.0f;
-                y = 0.0f;
-                z = 0.0f;
-                u = 0.0f;
-                v = 0.0f;
-                w = 1.0f;
-                weight = 1.0f;
-                continue;
-            } else {
-                weight *= 10.0f;
-            }
-        }
-
-        // Scatter: sample new direction using rejection method
-        float xi1, xi2, s, r, sin, cos;
-        // do {
-        //     xi1 = 2.0f * curand_uniform(&state) - 1.0f;
-        //     xi2 = 2.0f * curand_uniform(&state) - 1.0f;
-        //     s = xi1*xi1 + xi2*xi2;
-        // } while (s > 1.0f);
-
-        s = curand_uniform(&state);
-        r = sqrtf(s);
-        // theta = 2.0f * CUDART_PI_F * curand_uniform(&state);
-        // xi1 = r * cosf(theta);
-        // xi2 = r * sinf(theta);
-        sincospif(2.0f * curand_uniform(&state), &sin, &cos);
-        xi1 = r * cos;
-        xi2 = r * sin;
-
-        u = 2.0f * s - 1.0f;
-        //float factor = sqrtf((1.0f - u*u) / s);
-        float factor = 2.0f * sqrtf(1.0f - s);
-        v = xi1 * factor;
-        w = xi2 * factor;
-    }
-
-    if (prevShell >= 0) {
-        atomicAdd(&s_heats[prevShell], cachedW);
-        atomicAdd(&s_heats_sq[prevShell], cachedWS);
-    }
-
-    __syncthreads();
-
-    if (tid < SHELLS) {
-        atomicAdd(&heats[tid], s_heats[tid]);
-        atomicAdd(&heats_squared[tid], s_heats_sq[tid]);
-    }
-}
-
-__global__ void photon_kernel_v6(float* heats, float* heats_squared, unsigned int photons_per_thread) {
-    int tid = threadIdx.x;
-    int idx = blockIdx.x * blockDim.x + threadIdx.x;
-
-    // apuntadores en shared memory
-    __shared__ float s_heats[SHELLS];
-    __shared__ float s_heats_sq[SHELLS];
-
-    // Inicialización de shared (por los primeros SHELLS hilos)
-    if (tid < SHELLS) {
-        s_heats[tid]    = 0.0f;
-        s_heats_sq[tid] = 0.0f;
-    }
-    
-    __syncthreads();
-
-    // Initialize per-thread RNG
-    curandStatePhilox4_32_10_t state;
-    curand_init(clock64(), idx, 0, &state);
-
-    // Precompute constants
-    const float albedo = MU_S / (MU_S + MU_A);
-    const float shells_per_mfp = 1e4f / MICRONS_PER_SHELL / (MU_A + MU_S);
-
-    // Photon state
-    float x = 0.0f, y = 0.0f, z = 0.0f;
-    float u = 0.0f, v = 0.0f, w = 1.0f;
-    float weight = 1.0f;
-
-    unsigned int remaining_photons = photons_per_thread;
-
-    // Photon life loop
-    while (remaining_photons) {
-        float4 rnd4 = curand_uniform4(&state);
-        // Sample step length
-        float rnd = rnd4.w;
-        float t = -logf(rnd);
-        x += t * u;
-        y += t * v;
-        z += t * w;
-
-        // Determine shell
-        int shell = (int)(sqrtf(x*x + y*y + z*z) * shells_per_mfp);
-        if (shell >= SHELLS) shell = SHELLS - 1;
-
-        // Deposit energy
-        float deposit = (1.0f - albedo) * weight;
-        atomicAdd(&s_heats[shell], deposit);
-        atomicAdd(&s_heats_sq[shell], deposit*deposit);
-
-        // Update weight
-        weight *= albedo;
-
-        // Roulette for low-weight photons
-        if (weight < 0.001f) {
-            if (rnd4.x > 0.1f) {
-                // Photon is absorbed
-                remaining_photons--;
-                x = 0.0f;
-                y = 0.0f;
-                z = 0.0f;
-                u = 0.0f;
-                v = 0.0f;
-                w = 1.0f;
-                weight = 1.0f;
-                continue;
-            } else {
-                weight *= 10.0f;
-            }
-        }
-
-        // Scatter: sample new direction using rejection method
-        float xi1, xi2, s, r, sin, cos;
-        // do {
-        //     xi1 = 2.0f * curand_uniform(&state) - 1.0f;
-        //     xi2 = 2.0f * curand_uniform(&state) - 1.0f;
-        //     s = xi1*xi1 + xi2*xi2;
-        // } while (s > 1.0f);
-
-        s = rnd4.y;
-        r = sqrtf(s);
-        // theta = 2.0f * CUDART_PI_F * curand_uniform(&state);
-        // xi1 = r * cosf(theta);
-        // xi2 = r * sinf(theta);
-        sincospif(2.0f * rnd4.z, &sin, &cos);
-        xi1 = r * cos;
-        xi2 = r * sin;
-
-        u = 2.0f * s - 1.0f;
-        //float factor = sqrtf((1.0f - u*u) / s);
         float factor = 2.0f * sqrtf(1.0f - s);
         v = xi1 * factor;
         w = xi2 * factor;
@@ -552,7 +330,7 @@ __device__ __forceinline__ float4 xoshiro128p_next4(Xoshiro128pState *st) {
     return r;
 }
 
-__global__ void photon_kernel_v7(float* heats, float* heats_squared, unsigned int photons_per_thread) {
+__global__ void photon_kernel_xoshiro(float* heats, float* heats_squared, unsigned int photons_per_thread) {
     int tid = threadIdx.x;
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -645,7 +423,7 @@ __global__ void photon_kernel_v7(float* heats, float* heats_squared, unsigned in
     }
 }
 
-__global__ void photon_kernel_v8(float* heats, float* heats_squared, unsigned int photons_per_thread) {
+__global__ void photon_kernel_rsqrt(float* heats, float* heats_squared, unsigned int photons_per_thread) {
     int tid = threadIdx.x;
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
 
@@ -780,25 +558,19 @@ void launch_simulation(float *h_heats, float *h_heats_sq, double *elapsed_time) 
     checkCudaCall(cudaEventRecord(start, 0));
 
     // kernel v1
-    //photon_kernel_v1<<<blocks, GPU_THREADS>>>(d_heats, d_heats_sq, GPU_PHOTONS_PER_THREAD);
+    //photon_kernel_atomic_global<<<GPU_BLOCKS, GPU_THREADS>>>(d_heats, d_heats_sq, photons_per_thread);
 
     // kernel v2
-    //photon_kernel_v2<<<blocks, GPU_THREADS>>>(d_heats, d_heats_sq, GPU_PHOTONS_PER_THREAD);
+    //photon_kernel_shared<<<GPU_BLOCKS, GPU_THREADS>>>(d_heats, d_heats_sq, photons_per_thread);
 
     // kernel v3
-    // photon_kernel_v3<<<blocks, GPU_THREADS>>>(d_heats, d_heats_sq, GPU_PHOTONS_PER_THREAD);
-
-    // kernel v4
-    // photon_kernel_v4<<<blocks, GPU_THREADS>>>(d_heats, d_heats_sq, GPU_PHOTONS_PER_THREAD);
-
-    // kernel v6
-    // photon_kernel_v6<<<blocks, GPU_THREADS>>>(d_heats, d_heats_sq, GPU_PHOTONS_PER_THREAD);
+    //photon_kernel_polares<<<GPU_BLOCKS, GPU_THREADS>>>(d_heats, d_heats_sq, photons_per_thread);
 
     // kernel v7
-    // photon_kernel_v7<<<GPU_BLOCKS, GPU_THREADS>>>(d_heats, d_heats_sq, photons_per_thread);
+    //photon_kernel_xoshiro<<<GPU_BLOCKS, GPU_THREADS>>>(d_heats, d_heats_sq, photons_per_thread);
 
     // kernel v8
-    photon_kernel_v8<<<GPU_BLOCKS, GPU_THREADS>>>(d_heats, d_heats_sq, photons_per_thread);
+    photon_kernel_rsqrt<<<GPU_BLOCKS, GPU_THREADS>>>(d_heats, d_heats_sq, photons_per_thread);
 
     checkCudaCall(cudaEventRecord(stop, 0));
     checkCudaCall(cudaEventSynchronize(stop));
