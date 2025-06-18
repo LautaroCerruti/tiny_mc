@@ -47,5 +47,5 @@
 #endif
 
 #ifndef GPU_THREADS
-#define GPU_THREADS 128
+#define GPU_THREADS 512
 #endif
