@@ -5,14 +5,14 @@ import time
 
 # === Configuración inicial ===
 compiler       = "nvcc"
-compile_flags  = "-std=c++11 -arch=sm_60 -O3 -I/usr/local/cuda/include"
+compile_flags  = "-std=c++11 -arch=sm_60 -use_fast_math -O3 -I/usr/local/cuda/include"
 sources        = ["tiny_mc_cuda.cu", "photon_cuda.cu"]
 executable     = "photon_cuda"
 link_flags     = "-L/usr/local/cuda/lib64 -lcudart -lcurand -lm"
 dirs           = {"results": "results"}
 
 # CSV con formato: blocks,threads,photons,runs
-runs_csv   = "runs_gpu_best_config_1060.csv"
+runs_csv   = "runs_config/runs_gpu_best_config_1060.csv"
 # Archivo de salida generado por el ejecutable
 output_csv = os.path.join(dirs["results"], "gtx1060_by_size.csv")
 
