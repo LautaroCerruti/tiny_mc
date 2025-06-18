@@ -11,6 +11,7 @@ files = {
     'Final GPU GTX 1060': './results/lab4/gtx1060_by_size_v2.csv',
     'Lab4 GPU GTX 2080 TI': './results/lab4/entrega/gtx2080ti_by_size.csv',
     'Lab4 GPU Titan Xp': './results/lab4/entrega/titanxp_by_size.csv',
+    'Final GPU Titan Xp': './results/lab4/titanxp_by_size_v2.csv',
     # ...
 }
 
