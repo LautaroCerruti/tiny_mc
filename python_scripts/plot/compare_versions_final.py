@@ -3,16 +3,16 @@ import matplotlib.pyplot as plt
 
 # 1) Define aquí tus archivos (ruta → etiqueta)
 files = {
-    'Original Atom': './results/lab1/photon_size_atom.csv',
-    'Lab1 Atom': './results/lab1/photon_size_atom_xoshiro_opt.csv',
-    'Lab2 Atom': './results/lab2/atom_best_flag_v2.csv',
-    'Lab3 Atom': './results/lab3/best_pus_atom.csv',
-    'Lab4 GPU GTX 1060': './results/lab4/entrega/gtx1060_by_size.csv',
-    'Final GPU GTX 1060': './results/lab4/gtx1060_by_size_v2.csv',
-    'Lab4 GPU GTX 2080 TI': './results/lab4/entrega/gtx2080ti_by_size.csv',
-    'Lab4 GPU Titan Xp': './results/lab4/entrega/titanxp_by_size.csv',
-    'Final GPU Titan Xp': './results/lab4/titanxp_by_size_v2.csv',
-    'Final GPU GTX 2080 TI': './results/lab4/gtx2080ti_by_size_v2.csv',
+    'Original (AMD EPYC 7643)': './results/lab1/photon_size_atom.csv',
+    'Basic Optimizations (AMD EPYC 7643)': './results/lab1/photon_size_atom_xoshiro_opt.csv',
+    'SIMD Version (AMD EPYC 7643)': './results/lab2/atom_best_flag_v2.csv',
+    'OMP Version (AMD EPYC 7643)': './results/lab3/best_pus_atom.csv',
+    'CUDA V.1 (GTX 1060)': './results/lab4/entrega/gtx1060_by_size.csv',
+    'CUDA V.2 (GTX 1060)': './results/lab4/gtx1060_by_size_v2.csv',
+    'CUDA V.1 (GTX 2080 TI)': './results/lab4/entrega/gtx2080ti_by_size.csv',
+    'CUDA V.1 (Titan Xp)': './results/lab4/entrega/titanxp_by_size.csv',
+    'CUDA V.2 (Titan Xp)': './results/lab4/titanxp_by_size_v2.csv',
+    'CUDA V.2 (GTX 2080 TI)': './results/lab4/gtx2080ti_by_size_v2.csv',
     # ...
 }
 

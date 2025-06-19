@@ -15,4 +15,4 @@ This project contains a simple Monte Carlo simulation for photon transport. The 
 ## Results
 The figure below summarizes the overall speedup after each phase:
 
-![Comparación de speedup](results/lab4/comparacion_final_after_entrega.png)
+![Comparación de speedup](results/comparacion_final_after_entrega.png)
