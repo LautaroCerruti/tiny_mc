@@ -12,6 +12,7 @@ files = {
     'Lab4 GPU GTX 2080 TI': './results/lab4/entrega/gtx2080ti_by_size.csv',
     'Lab4 GPU Titan Xp': './results/lab4/entrega/titanxp_by_size.csv',
     'Final GPU Titan Xp': './results/lab4/titanxp_by_size_v2.csv',
+    'Final GPU GTX 2080 TI': './results/lab4/gtx2080ti_by_size_v2.csv',
     # ...
 }
 
@@ -30,7 +31,7 @@ ax.bar(x, max_values)
 ax.set_xticks(x)
 ax.set_xticklabels(labels, rotation=45, ha='right')
 ax.set_ylabel('P/s (millones de fotones por segundo)')
-ax.set_title('Comparación de P/s Máximo entre Labs')
+ax.set_title('Comparación de P/s Máximo obtenido')
 
 # Aquí aseguramos que Y empiece en 0 y deje un 10% de espacio por encima de la barra más alta
 y_top = max(max_values) * 1.10
