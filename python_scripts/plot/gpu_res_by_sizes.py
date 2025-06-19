@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # Leer el CSV
-df = pd.read_csv("results/gtx1060_by_size.csv")
+df = pd.read_csv("results/titanxp_by_size_v2.csv")
 
 # Agrupar por cantidad de fotones y calcular promedio de PUS
 grouped = df.groupby('photons')['pus'].max().reset_index()
