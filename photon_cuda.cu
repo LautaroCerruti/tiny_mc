@@ -80,113 +80,6 @@ __device__ __forceinline__ float xoshiro128p_next(Xoshiro128pState *st) {
 __global__ void photon_kernel(float* heats, float* heats_squared, unsigned int photons_per_thread) {
     int tid = threadIdx.x;
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
-
-    __shared__ float s_heats[SHELLS];
-    __shared__ float s_heats_sq[SHELLS];
-
-    if (GPU_THREADS < SHELLS) {
-        if (tid == 0) {
-            for (int i = 0; i < SHELLS; i++) {
-                s_heats[i]    = 0.0f;
-                s_heats_sq[i] = 0.0f;
-            }
-        }
-    } else {
-        if (tid < SHELLS) {
-            s_heats[tid]    = 0.0f;
-            s_heats_sq[tid] = 0.0f;
-        }
-    }
-    
-    __syncthreads();
-
-    Xoshiro128pState state;
-    uint64_t seed = clock64() + (uint64_t)idx;
-    xoshiro128p_init(seed, &state);
-
-    const float albedo = MU_S / (MU_S + MU_A);
-    const float shells_per_mfp = 1e4f / MICRONS_PER_SHELL / (MU_A + MU_S);
-
-    float x = 0.0f, y = 0.0f, z = 0.0f;
-    float u = 0.0f, v = 0.0f, w = 1.0f;
-    float weight = 1.0f;
-
-    unsigned int remaining_photons = photons_per_thread;
-
-    while (remaining_photons) {
-        float4 rnd4 = xoshiro128p_next4(&state);
-        float rnd = rnd4.w;
-        float t = -logf(rnd);
-        x += t * u;
-        y += t * v;
-        z += t * w;
-
-        float aux = x*x + y*y + z*z;
-        float inv_r = rsqrtf(aux);
-        int shell = min(int(inv_r * aux * shells_per_mfp), SHELLS-1);
-
-        float deposit = (1.0f - albedo) * weight;
-        atomicAdd(&s_heats[shell], deposit);
-        atomicAdd(&s_heats_sq[shell], deposit*deposit);
-
-        weight *= albedo;
-
-        if (weight < 0.001f) {
-            if (rnd4.x > 0.1f) {
-                remaining_photons--;
-                x = 0.0f;
-                y = 0.0f;
-                z = 0.0f;
-                u = 0.0f;
-                v = 0.0f;
-                w = 1.0f;
-                weight = 1.0f;
-                continue;
-            } else {
-                weight *= 10.0f;
-            }
-        }
-
-        float xi1, xi2, s, r, sin, cos;
-
-        s = rnd4.y;
-        r = rsqrtf(s) * s;
-        sincospif(2.0f * rnd4.z, &sin, &cos);
-        xi1 = r * cos;
-        xi2 = r * sin;
-
-        u = 2.0f * s - 1.0f;
-        float temp = 1.0f - s;
-        float factor = 2.0f * rsqrtf(temp) * temp;
-        v = xi1 * factor;
-        w = xi2 * factor;
-    }
-
-    __syncthreads();
-
-    if (tid < SHELLS) {
-        atomicAdd(&heats[tid], s_heats[tid]);
-        atomicAdd(&heats_squared[tid], s_heats_sq[tid]);
-    }
-
-    if (GPU_THREADS < SHELLS) {
-        if (tid == 0) {
-            for (int i = 0; i < SHELLS; i++) {
-                atomicAdd(&heats[i], s_heats[i]);
-                atomicAdd(&heats_squared[i], s_heats_sq[i]);
-            }
-        }
-    } else {
-        if (tid < SHELLS) {
-            atomicAdd(&heats[tid], s_heats[tid]);
-            atomicAdd(&heats_squared[tid], s_heats_sq[tid]);
-        }
-    }
-}
-
-__global__ void photon_kernel_warp(float* heats, float* heats_squared, unsigned int photons_per_thread) {
-    int tid = threadIdx.x;
-    int idx = blockIdx.x * blockDim.x + threadIdx.x;
     int lid  = tid%warpSize;
 
     __shared__ float s_heats[SHELLS][32];
@@ -303,7 +196,7 @@ void launch_simulation(float *h_heats, float *h_heats_sq, double *elapsed_time) 
 
     checkCudaCall(cudaEventRecord(start, 0));
 
-    photon_kernel_warp<<<GPU_BLOCKS, GPU_THREADS>>>(d_heats, d_heats_sq, photons_per_thread);
+    photon_kernel<<<GPU_BLOCKS, GPU_THREADS>>>(d_heats, d_heats_sq, photons_per_thread);
 
     checkCudaCall(cudaEventRecord(stop, 0));
     checkCudaCall(cudaEventSynchronize(stop));
